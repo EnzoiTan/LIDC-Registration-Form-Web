@@ -583,34 +583,46 @@ async function displayUserData(userData) {
 
   const patronType = userData.patron.toLowerCase();
 
-  // Hide all fields initially
-  departmentInput.style.display = 'none';
-  courseInput.style.display = 'none';
-  majorInput.style.display = 'none';
-  strandInput.style.display = 'none';
-  gradeInput.style.display = 'none';
-  schoolSelect.style.display = 'none';
-  campusDeptInput.style.display = 'none';
-  collegeInput.style.display = 'none';
-
-  // Show fields based on patron type
   switch (patronType) {
-    case 'student':
+    default: // student
       departmentInput.style.display = 'block';
       courseInput.style.display = 'block';
       majorInput.style.display = 'block';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'none';
       break;
     case 'faculty':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'none';
       collegeInput.style.display = 'block';
       break;
     case 'admin':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
       campusDeptInput.style.display = 'block';
+      collegeInput.style.display = 'none';
       break;
     case 'visitor':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
       schoolSelect.style.display = 'block';
-      break;
-    default:
-      console.error('Unknown patron type:', patronType);
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'none';
       break;
   }
 }
