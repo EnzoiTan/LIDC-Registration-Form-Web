@@ -435,7 +435,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     }
 
     // You can also generate QR code for this entry and save it
-    const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
+    const fullQRCodeLink = `https://enzoitan.github.io/LIDC-Registration-Form-Web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
     const qrCodeData = await generateQRCodeData(fullQRCodeLink);
 
     // Save the QR code data to Firestore
