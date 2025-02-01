@@ -592,6 +592,127 @@ async function displayUserData(userData) {
       document.getElementById("specify-school-input").value = userData.specifySchool || "";
     }
   }
+
+  switch (patronType) {
+    default: // student
+      departmentInput.style.display = 'block';
+      courseInput.style.display = 'block';
+      majorInput.style.display = 'block';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'none';
+      break;
+    case 'faculty':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'block';
+      break;
+    case 'admin':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'block';
+      collegeInput.style.display = 'none';
+      break;
+    case 'visitor':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'block';
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'none';
+      break;
+  }
+};
+
+// Display each field of the fetched user data
+userDataDiv.innerHTML = `
+  <p>Library ID: ${userData.libraryIdNo}</p>
+  <p>Type of Patron: ${userData.patron}</p>
+  <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
+  <p>Department: ${userData.department}</p>
+  <p>Course: ${userData.course}</p>
+  <p>Major: ${userData.major}</p>
+  <p>Grade: ${userData.grade}</p>
+  <p>Strand: ${userData.strand}</p>
+  <p>School Year: ${userData.schoolYear}</p>
+  <p>Semester: ${userData.semester}</p>
+  <p>Valid Until: ${userData.validUntil}</p>
+  <p>Token: ${userData.token}</p>
+  <p>Times Entered: ${userData.timesEntered}</p>
+  <p>Entry Timestamps:</p>
+  <ul>
+    ${userData.entryTimestamps
+      .map((timestamp) => `<li>${new Date(timestamp).toLocaleString()}</li>`)
+      .join("")}
+  </ul>
+`;
+
+// Hide or show fields based on patron type
+const departmentInput = document.querySelector('.department-input');
+const courseInput = document.querySelector('.course-input');
+const majorInput = document.querySelector('.major-input');
+const strandInput = document.querySelector('.strand-input');
+const gradeInput = document.querySelector('.grade-input');
+const schoolSelect = document.querySelector('.school');
+const campusDeptInput = document.querySelector('.campusdept');
+const collegeInput = document.querySelector('.college');
+
+const patronType = userData.patron.toLowerCase();
+
+switch (patronType) {
+  default: // student
+    departmentInput.style.display = 'block';
+    courseInput.style.display = 'block';
+    majorInput.style.display = 'block';
+    strandInput.style.display = 'none';
+    gradeInput.style.display = 'none';
+    schoolSelect.style.display = 'none';
+    campusDeptInput.style.display = 'none';
+    collegeInput.style.display = 'none';
+    break;
+  case 'faculty':
+    departmentInput.style.display = 'none';
+    courseInput.style.display = 'none';
+    majorInput.style.display = 'none';
+    strandInput.style.display = 'none';
+    gradeInput.style.display = 'none';
+    schoolSelect.style.display = 'none';
+    campusDeptInput.style.display = 'none';
+    collegeInput.style.display = 'block';
+    break;
+  case 'admin':
+    departmentInput.style.display = 'none';
+    courseInput.style.display = 'none';
+    majorInput.style.display = 'none';
+    strandInput.style.display = 'none';
+    gradeInput.style.display = 'none';
+    schoolSelect.style.display = 'none';
+    campusDeptInput.style.display = 'block';
+    collegeInput.style.display = 'none';
+    break;
+  case 'visitor':
+    departmentInput.style.display = 'none';
+    courseInput.style.display = 'none';
+    majorInput.style.display = 'none';
+    strandInput.style.display = 'none';
+    gradeInput.style.display = 'none';
+    schoolSelect.style.display = 'block';
+    campusDeptInput.style.display = 'none';
+    collegeInput.style.display = 'none';
+    break;
 }
 
 // Handle URL parameters
