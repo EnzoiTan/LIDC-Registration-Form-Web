@@ -539,12 +539,6 @@ async function fetchUserData(libraryId) {
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
 
-  // Update courses and majors based on department and course
-  await updateCourses(userData.department);
-  document.getElementById("course-select").value = userData.course;
-  await updateMajors(userData.course, userData.department);
-  document.getElementById("major-select").value = userData.major;
-
   // Display each field of the fetched user data
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
@@ -583,46 +577,34 @@ async function displayUserData(userData) {
 
   const patronType = userData.patron.toLowerCase();
 
+  // Hide all fields initially
+  departmentInput.style.display = 'none';
+  courseInput.style.display = 'none';
+  majorInput.style.display = 'none';
+  strandInput.style.display = 'none';
+  gradeInput.style.display = 'none';
+  schoolSelect.style.display = 'none';
+  campusDeptInput.style.display = 'none';
+  collegeInput.style.display = 'none';
+
+  // Show fields based on patron type
   switch (patronType) {
-    default: // student
+    case 'student':
       departmentInput.style.display = 'block';
       courseInput.style.display = 'block';
       majorInput.style.display = 'block';
-      strandInput.style.display = 'none';
-      gradeInput.style.display = 'none';
-      schoolSelect.style.display = 'none';
-      campusDeptInput.style.display = 'none';
-      collegeInput.style.display = 'none';
       break;
     case 'faculty':
-      departmentInput.style.display = 'none';
-      courseInput.style.display = 'none';
-      majorInput.style.display = 'none';
-      strandInput.style.display = 'none';
-      gradeInput.style.display = 'none';
-      schoolSelect.style.display = 'none';
-      campusDeptInput.style.display = 'none';
       collegeInput.style.display = 'block';
       break;
     case 'admin':
-      departmentInput.style.display = 'none';
-      courseInput.style.display = 'none';
-      majorInput.style.display = 'none';
-      strandInput.style.display = 'none';
-      gradeInput.style.display = 'none';
-      schoolSelect.style.display = 'none';
       campusDeptInput.style.display = 'block';
-      collegeInput.style.display = 'none';
       break;
     case 'visitor':
-      departmentInput.style.display = 'none';
-      courseInput.style.display = 'none';
-      majorInput.style.display = 'none';
-      strandInput.style.display = 'none';
-      gradeInput.style.display = 'none';
       schoolSelect.style.display = 'block';
-      campusDeptInput.style.display = 'none';
-      collegeInput.style.display = 'none';
+      break;
+    default:
+      console.error('Unknown patron type:', patronType);
       break;
   }
 }
