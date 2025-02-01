@@ -466,6 +466,22 @@ document.getElementById("school-select").addEventListener("change", (event) => {
 });
 
 
+
+// Generate QR code and return as Base64 data URL
+async function generateQRCodeData(data) {
+  try {
+    const qrDataURL = await QRCode.toDataURL(JSON.stringify(data), {
+      width: 256,
+      margin: 1,
+    });
+    return qrDataURL;
+  } catch (error) {
+    console.error("Error generating QR Code:", error);
+    throw error;
+  }
+}
+
+
 // Auto-download the QR code
 function downloadQRCode(dataURL, filename) {
   const link = document.createElement("a");
