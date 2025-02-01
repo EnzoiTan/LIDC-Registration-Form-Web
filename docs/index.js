@@ -539,13 +539,13 @@ async function fetchUserData(libraryId) {
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
 
-  // Update courses and majors based on department and course
-  await updateCourses(userData.department);
-  document.getElementById("course-select").value = userData.course;
-  await updateMajors(userData.course, userData.department);
-  document.getElementById("major-select").value = userData.major;
+  // Check if the userDataDiv exists
+  if (!userDataDiv) {
+    console.error("Element with ID 'user-data' not found in the DOM.");
+    return;
+  }
 
-  // Display each field of the fetched user data
+  // Display each field of the fetched user data using <p> tags
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
     <p>Type of Patron: ${userData.patron}</p>
@@ -560,6 +560,9 @@ async function displayUserData(userData) {
     <p>Valid Until: ${userData.validUntil}</p>
     <p>Token: ${userData.token}</p>
     <p>Times Entered: ${userData.timesEntered}</p>
+    <p>School: ${userData.schoolSelect}</p>
+    <p>College: ${userData.collegeSelect}</p>
+    <p>Campus Department: ${userData.campusDept}</p>
     <p>Entry Timestamps:</p>
     <ul>
       ${userData.entryTimestamps
