@@ -246,9 +246,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const majorInput = document.querySelector('.major-input');
     const strandInput = document.querySelector('.strand-input');
     const gradeInput = document.querySelector('.grade-input');
-    const schoolSelect = document.querySelector('.school');
-    const campusDeptInput = document.querySelector('.campusdept');
-    const collegeInput = document.querySelector('.college');
+    const schoolSelect = document.querySelector('.school-select');
+    const campusDeptInput = document.querySelector('.campusdept-select');
+    const collegeInput = document.querySelector('.college-select');
   
     // Hide all fields initially
     departmentInput.style.display = 'none';
