@@ -532,11 +532,20 @@ async function displayUserData(userData) {
   }
 
   if (userData.patron === 'faculty') {
-    await populateSelect('college', 'colleges', userData.collegeSelect);
+    // Populate college-select for faculty
+    document.getElementById("college-select").value = userData.collegeSelect || "";
   } else if (userData.patron === 'admin') {
-    await populateSelect('campusdept', 'campus_departments', userData.campusDept);
+    // Populate campusdept-select for admin
+    document.getElementById("campusdept-select").value = userData.campusDept || "";
   } else if (userData.patron === 'visitor') {
-    await populateSelect('school', 'schools', userData.schoolSelect);
+    // Populate school-select and specify-school-input for visitor
+    document.getElementById("school-select").value = userData.schoolSelect || "";
+    if (userData.schoolSelect === 'other') {
+      document.getElementById("specify-school-input").value = userData.specifySchool || "";
+      document.getElementById("specify-school-input").style.display = "block"; // Show the input field
+    } else {
+      document.getElementById("specify-school-input").style.display = "none"; // Hide the input field
+    }
   }
 
   // Display user data dynamically
