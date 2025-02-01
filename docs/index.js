@@ -547,6 +547,9 @@ async function generateQRCodeAndDownload(newEntry) {
         return;
       }
 
+      console.log("QR Code URL:", fullQRCodeLink);
+      console.log("QR Code Data URL:", url);
+
       // Trigger QR code download
       const link = document.createElement("a");
       link.href = url;
