@@ -587,56 +587,31 @@ async function displayUserData(userData) {
   campusDeptInput.style.display = 'none';
   collegeInput.style.display = 'none';
 
-  // Fetch and populate data based on patron type
+  // Bind fetched data to input/select fields
+  document.getElementById('school-select').value = userData.schoolSelect || '';
+  document.getElementById('campusdept-select').value = userData.campusDept || '';
+  document.getElementById('college-select').value = userData.collegeSelect || '';
+
+  // Show fields based on patron type
   switch (patronType) {
     case 'student':
       departmentInput.style.display = 'block';
       courseInput.style.display = 'block';
       majorInput.style.display = 'block';
-      await fetchAndPopulateStudentData(userData);
       break;
     case 'faculty':
       collegeInput.style.display = 'block';
-      await fetchAndPopulateFacultyData(userData);
       break;
     case 'admin':
       campusDeptInput.style.display = 'block';
-      await fetchAndPopulateAdminData(userData);
       break;
     case 'visitor':
       schoolSelect.style.display = 'block';
-      await fetchAndPopulateVisitorData(userData);
       break;
     default:
       console.error('Unknown patron type:', patronType);
       break;
   }
-}
-
-// Fetch and populate student-specific data
-async function fetchAndPopulateStudentData(userData) {
-  const studentData = await fetch(`/api/student/${userData.id}`).then((res) => res.json());
-  document.getElementById('department-select').value = studentData.department;
-  document.getElementById('course-select').value = studentData.course;
-  document.getElementById('major-select').value = studentData.major;
-}
-
-// Fetch and populate faculty-specific data
-async function fetchAndPopulateFacultyData(userData) {
-  const facultyData = await fetch(`/api/faculty/${userData.id}`).then((res) => res.json());
-  document.getElementById('college-select').value = facultyData.college;
-}
-
-// Fetch and populate admin-specific data
-async function fetchAndPopulateAdminData(userData) {
-  const adminData = await fetch(`/api/admin/${userData.id}`).then((res) => res.json());
-  document.getElementById('campusdept-select').value = adminData.campusDept;
-}
-
-// Fetch and populate visitor-specific data
-async function fetchAndPopulateVisitorData(userData) {
-  const visitorData = await fetch(`/api/visitor/${userData.id}`).then((res) => res.json());
-  document.getElementById('school-select').value = visitorData.school;
 }
 
 // Handle URL parameters
