@@ -409,7 +409,6 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     strand: department === "shs" ? strand : "", // Only save strand if SHS
     schoolYear,
     semester,
-    timesEntered: 1, // Start timesEntered with 1
     token: generateRandomToken(),
     timestamp: new Date(), // Save the timestamp of submission
     collegeSelect, // Selected college/department
@@ -425,16 +424,21 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
-      // If user already exists, update their document
-      await setDoc(userRef, userData, { merge: true }); // merge to update only necessary fields
-      alert("Welcome back! Your entry has been recorded.");
+      // If user already exists, increment the timesEntered field
+      const existingData = userSnap.data();
+      const updatedTimesEntered = (existingData.timesEntered || 0) + 1;
+
+      // Update only the timesEntered field
+      await setDoc(userRef, { timesEntered: updatedTimesEntered }, { merge: true });
+      alert(`Welcome back! Your entry has been recorded. Times entered: ${updatedTimesEntered}`);
     } else {
-      // If new user, create a new document
+      // If new user, create a new document with timesEntered set to 1
+      userData.timesEntered = 1; // Start timesEntered with 1
       await setDoc(userRef, userData); // Create new document
       alert("Data successfully submitted!");
     }
 
-    // You can also generate QR code for this entry and save it
+    // Generate QR code for this entry and save it
     const fullQRCodeLink = `https://enzoitan.github.io/LIDC-Registration-Form-Web//?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
     const qrCodeData = await generateQRCodeAndDownload(fullQRCodeLink);
 
