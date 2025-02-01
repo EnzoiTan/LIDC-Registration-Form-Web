@@ -486,9 +486,9 @@ function toggleFields(patronType) {
   const majorInput = document.querySelector('.major-input');
   const strandInput = document.querySelector('.strand-input');
   const gradeInput = document.querySelector('.grade-input');
-  const schoolSelect = document.querySelector('.school').value = userData.schoolSelect || "";
-  const campusDeptInput = document.querySelector('.campusdept').value = userData.campusDept || "";
-  const collegeInput = document.querySelector('.college').value = userData.collegeSelect || "";
+  const schoolSelect = document.querySelector('.school');
+  const campusDeptInput = document.querySelector('.campusdept');
+  const collegeInput = document.querySelector('.college');
 
   // Reset all fields to hidden initially
   departmentInput.style.display = 'none';
@@ -519,42 +519,51 @@ function toggleFields(patronType) {
   }
 }
 
-async function displayUserData(userData) {
-  const userDataDiv = document.getElementById("user-data");
+    async function displayUserData(userData) {
+      const userDataDiv = document.getElementById("user-data");
 
-  // Update courses and majors based on department and course
-  if (userData.department) {
-    await updateCourses(userData.department);
-    document.getElementById("course-select").value = userData.course || "";
-    await updateMajors(userData.course, userData.department);
-    document.getElementById("major-select").value = userData.major || "";
-  }
+      // Update fields dynamically
+      if (userData.department) {
+        await updateCourses(userData.department);
+        document.getElementById("course-select").value = userData.course || "";
+        await updateMajors(userData.course, userData.department);
+        document.getElementById("major-select").value = userData.major || "";
+      }
 
-  // Display user data dynamically
-  userDataDiv.innerHTML = `
-    <p>Library ID: ${userData.libraryIdNo}</p>
-    <p>Type of Patron: ${userData.patron}</p>
-    <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
-    ${userData.department ? `<p>Department: ${userData.department}</p>` : ''}
-    ${userData.course ? `<p>Course: ${userData.course}</p>` : ''}
-    ${userData.major ? `<p>Major: ${userData.major}</p>` : ''}
-    ${userData.grade ? `<p>Grade: ${userData.grade}</p>` : ''}
-    ${userData.strand ? `<p>Strand: ${userData.strand}</p>` : ''}
-    <p>School Year: ${userData.schoolYear}</p>
-    <p>Semester: ${userData.semester}</p>
-    <p>Valid Until: ${userData.validUntil}</p>
-    <p>Token: ${userData.token}</p>
-    <p>Times Entered: ${userData.timesEntered}</p>
-    ${userData.collegeSelect ? `<p>College: ${userData.collegeSelect}</p>` : ''}
-    ${userData.schoolSelect ? `<p>School: ${userData.schoolSelect}</p>` : ''}
-    ${userData.specifySchool ? `<p>Specify School: ${userData.specifySchool}</p>` : ''}
-    ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
-  `;
+      // Ensure all relevant fields are updated
+      document.querySelector('.department-input').value = userData.department || "";
+      document.querySelector('.course-input').value = userData.course || "";
+      document.querySelector('.major-input').value = userData.major || "";
+      document.querySelector('.grade-input').value = userData.grade || "";
+      document.querySelector('.strand-input').value = userData.strand || "";
+      document.querySelector('.school').value = userData.schoolSelect || "";
+      document.querySelector('.campusdept').value = userData.campusDept || "";
+      document.querySelector('.college').value = userData.collegeSelect || "";
 
-  // Ensure fields are toggled correctly
-  toggleFields(userData.patron);
-}
+      // Display user data dynamically
+      userDataDiv.innerHTML = `
+        <p>Library ID: ${userData.libraryIdNo}</p>
+        <p>Type of Patron: ${userData.patron}</p>
+        <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
+        ${userData.department ? `<p>Department: ${userData.department}</p>` : ''}
+        ${userData.course ? `<p>Course: ${userData.course}</p>` : ''}
+        ${userData.major ? `<p>Major: ${userData.major}</p>` : ''}
+        ${userData.grade ? `<p>Grade: ${userData.grade}</p>` : ''}
+        ${userData.strand ? `<p>Strand: ${userData.strand}</p>` : ''}
+        <p>School Year: ${userData.schoolYear}</p>
+        <p>Semester: ${userData.semester}</p>
+        <p>Valid Until: ${userData.validUntil}</p>
+        <p>Token: ${userData.token}</p>
+        <p>Times Entered: ${userData.timesEntered}</p>
+        ${userData.collegeSelect ? `<p>College: ${userData.collegeSelect}</p>` : ''}
+        ${userData.schoolSelect ? `<p>School: ${userData.schoolSelect}</p>` : ''}
+        ${userData.specifySchool ? `<p>Specify School: ${userData.specifySchool}</p>` : ''}
+        ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
+      `;
 
+      // Ensure fields are toggled correctly based on patron type
+      toggleFields(userData.patron);
+    }
 
 // Handle URL parameters
 const urlParams = new URLSearchParams(window.location.search);
