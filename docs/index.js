@@ -294,8 +294,10 @@ document.querySelector('.patron select').addEventListener('change', (event) => {
 document.addEventListener("DOMContentLoaded", () => {
   const patronSelect = document.querySelector('.patron select');
   if (patronSelect) {
-    toggleFields(patronSelect.value);
+    toggleFields(patronSelect.value); // Initialize fields based on default patron type
   }
+
+  // console.log(`Toggling fields for patron type: ${patronType}`);
 });
 
   const toggleSpecifySchoolInput = () => {
