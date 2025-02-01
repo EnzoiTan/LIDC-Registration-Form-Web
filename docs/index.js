@@ -437,7 +437,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
         },
         { merge: true }
       );
-      showModal("Welcome back! Your entry has been recorded.");
+      alert("Welcome back! Your entry has been recorded.");
     } else {
       // Create new user with all data
       await setDoc(userRef, userData);
@@ -453,13 +453,13 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
         { merge: true }
       );
       downloadQRCode(qrCodeData, `${libraryIdNo}.png`);
-      showModal("Data successfully submitted!");
+      alert("Data successfully submitted!");
     }
 
     window.location.reload();
   } catch (error) {
     console.error("Error storing data:", error);
-    showModal("An error occurred while storing the data. Please try again.");
+    alert("An error occurred while storing the data. Please try again.");
   }
 });
 
@@ -527,7 +527,7 @@ async function displayUserData(userData) {
   // Display each field of the fetched user data
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
-    <p>Type of Patron: ${userData.libraryIdNo}</p>
+    <p>Type of Patron: ${userData.patron}</p>
     <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
     <p>Department: ${userData.department}</p>
     <p>Course: ${userData.course}</p>
@@ -538,6 +538,13 @@ async function displayUserData(userData) {
     <p>Semester: ${userData.semester}</p>
     <p>Valid Until: ${userData.validUntil}</p>
     <p>Token: ${userData.token}</p>
+    <p>Times Entered: ${userData.timesEntered}</p>
+    <p>Entry Timestamps:</p>
+    <ul>
+      ${userData.entryTimestamps
+        .map((timestamp) => `<li>${new Date(timestamp).toLocaleString()}</li>`)
+        .join("")}
+    </ul>
   `;
 
   // Hide or show fields based on department
@@ -545,7 +552,7 @@ async function displayUserData(userData) {
     document.querySelector(".course-input").style.display = "none";
     document.querySelector(".major-input").style.display = "none";
     document.querySelector(".grade-input").style.display = "block";
-    document.querySelector(".strand-input").style.display = "block"; 
+    document.querySelector(".strand-input").style.display = "block";
   } else {
     document.querySelector(".course-input").style.display = "block";
     document.querySelector(".major-input").style.display = "block";
