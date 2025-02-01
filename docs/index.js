@@ -250,47 +250,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     const campusDeptInput = document.querySelector('.campusdept');
     const collegeInput = document.querySelector('.college');
   
-    // Show fields based on patron type
+    // Hide all inputs initially
+    [departmentInput, courseInput, majorInput, strandInput, gradeInput, schoolSelect, campusDeptInput, collegeInput].forEach(input => {
+      input.style.display = 'none';
+    });
+  
     switch (patronType) {
+      case 'faculty':
+        collegeInput.style.display = 'block';
+        break;
+      case 'admin':
+        campusDeptInput.style.display = 'block';
+        break;
+      case 'visitor':
+        schoolSelect.style.display = 'block';
+        if (document.getElementById("school-select").value === 'other') {
+          document.getElementById("specify-school-input").style.display = 'block';
+        }
+        break;
       default:
         departmentInput.style.display = 'block';
         courseInput.style.display = 'block';
         majorInput.style.display = 'block';
-        strandInput.style.display = 'none';
-        gradeInput.style.display = 'none';
-        schoolSelect.style.display = 'none';
-        campusDeptInput.style.display = 'none';
-        collegeInput.style.display = 'none';
-        break;
-      case 'faculty':
-        departmentInput.style.display = 'none';
-        courseInput.style.display = 'none';
-        majorInput.style.display = 'none';
-        strandInput.style.display = 'none';
-        gradeInput.style.display = 'none';
-        schoolSelect.style.display = 'none';
-        campusDeptInput.style.display = 'none';
-        collegeInput.style.display = 'block';
-        break;
-      case 'admin':
-        departmentInput.style.display = 'none';
-        courseInput.style.display = 'none';
-        majorInput.style.display = 'none';
-        strandInput.style.display = 'none';
-        gradeInput.style.display = 'none';
-        schoolSelect.style.display = 'none';
-        campusDeptInput.style.display = 'block';
-        collegeInput.style.display = 'none';
-        break;
-      case 'visitor':
-        departmentInput.style.display = 'none';
-        courseInput.style.display = 'none';
-        majorInput.style.display = 'none';
-        strandInput.style.display = 'none';
-        gradeInput.style.display = 'none';
-        schoolSelect.style.display = 'block';
-        campusDeptInput.style.display = 'none';
-        collegeInput.style.display = 'none';
         break;
     }
   };
@@ -303,9 +284,9 @@ document.querySelector('.patron select').addEventListener('change', (event) => {
 // Initialize fields based on default patron type
 document.addEventListener("DOMContentLoaded", () => {
   const patronSelect = document.querySelector('.patron select');
-  if (patronSelect) {
-    toggleFields(patronSelect.value); // Initialize fields based on default patron type
-  }
+    patronSelect.addEventListener('change', (event) => {
+      toggleFields(event.target.value);
+    });
 
   // console.log(`Toggling fields for patron type: ${patronType}`);
 });
@@ -535,23 +516,9 @@ async function fetchUserData(libraryId) {
   }
 }
 
-function toggleFields(patronType) {
-  // Add logic to toggle fields based on patron type
-  console.log(`Toggling fields for ${patronType}`);
-}
-
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
 
-  // Update courses and majors based on department and course
-  if (userData.department) {
-    await updateCourses(userData.department);
-    document.getElementById("course-select").value = userData.course || "";
-    await updateMajors(userData.course, userData.department);
-    document.getElementById("major-select").value = userData.major || "";
-  }
-
-  // Display each field of the fetched user data
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
     <p>Type of Patron: ${userData.patron}</p>
@@ -559,45 +526,11 @@ async function displayUserData(userData) {
     ${userData.department ? `<p>Department: ${userData.department}</p>` : ''}
     ${userData.course ? `<p>Course: ${userData.course}</p>` : ''}
     ${userData.major ? `<p>Major: ${userData.major}</p>` : ''}
-    ${userData.grade ? `<p>Grade: ${userData.grade}</p>` : ''}
-    ${userData.strand ? `<p>Strand: ${userData.strand}</p>` : ''}
-    <p>School Year: ${userData.schoolYear}</p>
-    <p>Semester: ${userData.semester}</p>
-    <p>Valid Until: ${userData.validUntil}</p>
-    <p>Token: ${userData.token}</p>
-    <p>Times Entered: ${userData.timesEntered}</p>
-    <p>Entry Timestamps:</p>
-    <ul>
-      ${userData.entryTimestamps
-        .map((timestamp) => `<li>${new Date(timestamp).toLocaleString()}</li>`)
-        .join("")}
-    </ul>
     ${userData.collegeSelect ? `<p>College: ${userData.collegeSelect}</p>` : ''}
     ${userData.schoolSelect ? `<p>School: ${userData.schoolSelect}</p>` : ''}
     ${userData.specifySchool ? `<p>Specify School: ${userData.specifySchool}</p>` : ''}
     ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
   `;
-
-  // Populate fields based on patron type
-  if (userData.patron === 'faculty') {
-    // Populate college-select for faculty
-    document.getElementById("college-select").value = userData.collegeSelect || "";
-  } else if (userData.patron === 'admin') {
-    // Populate campusdept-select for admin
-    document.getElementById("campusdept-select").value = userData.campusDept || "";
-  } else if (userData.patron === 'visitor') {
-    // Populate school-select and specify-school-input for visitor
-    document.getElementById("school-select").value = userData.schoolSelect || "";
-    if (userData.schoolSelect === 'other') {
-      document.getElementById("specify-school-input").value = userData.specifySchool || "";
-      document.getElementById("specify-school-input").style.display = "block"; // Show the input field
-    } else {
-      document.getElementById("specify-school-input").style.display = "none"; // Hide the input field
-    }
-  }
-
-  // Toggle fields based on patron type
-  toggleFields(userData.patron);
 }
 
 // Handle URL parameters
