@@ -431,7 +431,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
       // Create new user with all data
       await setDoc(userRef, userData);
       // Generate and save QR code for new users
-      const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-Web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
+      const fullQRCodeLink = `https://enzoitan.github.io/LIDC-Registration-Form-Web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
       const qrCodeData = await generateQRCodeData(fullQRCodeLink);
       await setDoc(userRef, {
         qrCodeURL: fullQRCodeLink,
