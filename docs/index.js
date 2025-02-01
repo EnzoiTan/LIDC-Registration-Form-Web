@@ -237,7 +237,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const urlParams = new URLSearchParams(window.location.search);
-  const idnumber = urlParams.get('idnumber'); // Get ID from URL if available
+  const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
 
   // Function to toggle visibility based on patron type
   const toggleFields = (patronType) => {
@@ -306,16 +306,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   toggleFields(patronSelect.value);
   toggleSpecifySchoolInput(); // Ensure the input field is shown/hidden based on the current selection
 
-  if (idnumber) {
+  if (libraryIdNo) {
     // Fetch data for the specific Library ID
     try {
-      const userRef = doc(db, "LIDC_Users", idnumber);
+      const userRef = doc(db, "LIDC_Users", libraryIdNo);
       const docSnap = await getDoc(userRef);
 
       if (docSnap.exists()) {
         const userData = docSnap.data();
         // Fill input fields with existing user data
-        libraryIdInput.value = userData.idnumber;
+        libraryIdInput.value = userData.libraryIdNo;
         validUntilInput.value = userData.validUntil || "July 2025"; // Default if missing
         displayUserData(userData); // Load other user details
         toggleFields(userData.patronType); // Apply visibility logic based on patron type
@@ -331,14 +331,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const libraryIdQuery = query(
         collection(db, "LIDC_Users"),
-        orderBy("idnumber", "desc"),
+        orderBy("libraryIdNo", "desc"),
         limit(1)
       );
       const querySnapshot = await getDocs(libraryIdQuery);
       let newId = "00001"; // Default ID if no data exists
       if (!querySnapshot.empty) {
         const lastDoc = querySnapshot.docs[0];
-        const lastId = parseInt(lastDoc.data().idnumber, 10);
+        const lastId = parseInt(lastDoc.data().libraryIdNo, 10);
         newId = (lastId + 1).toString().padStart(5, "0");
       }
       libraryIdInput.value = newId;
@@ -384,7 +384,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
   const schoolYear = document.querySelector(".year-sem-inputs .data-input:nth-child(1) select").value.trim();
   const semester = document.querySelector(".year-sem-inputs .data-input:nth-child(2) select").value.trim();
 
-  const idnumber = libraryIdInput.value.trim();
+  const libraryIdNo = libraryIdInput.value.trim();
   const validUntil = validUntilInput.value.trim();
 
   // Collecting additional admin-related data
@@ -395,7 +395,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
 
   // Prepare the data object to store in Firestore
   const userData = {
-    idnumber,
+    libraryIdNo,
     validUntil,
     patron,
     lastName,
@@ -419,7 +419,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
   };
 
   try {
-    const userRef = doc(db, "LIDC_Users", idnumber);
+    const userRef = doc(db, "LIDC_Users", libraryIdNo);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
@@ -431,13 +431,13 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
       // Create new user with all data
       await setDoc(userRef, userData);
       // Generate and save QR code for new users
-      const fullQRCodeLink = `https://enzoitan.github.io/LIDC-Registration-Form-Web/?idnumber=${idnumber}&token=${userData.token}`;
+      const fullQRCodeLink = `https://enzoitan.github.io/LIDC-Registration-Form-Web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
       const qrCodeData = await generateQRCodeData(fullQRCodeLink);
       await setDoc(userRef, {
         qrCodeURL: fullQRCodeLink,
         qrCodeImage: qrCodeData
       }, { merge: true });
-      downloadQRCode(qrCodeData, `${idnumber}.png`);
+      downloadQRCode(qrCodeData, `${libraryIdNo}.png`);
       alert("Data successfully submitted!");
     }
 
@@ -511,8 +511,8 @@ async function displayUserData(userData) {
 
   // Display each field of the fetched user data
   userDataDiv.innerHTML = `
-    <p>Library ID: ${userData.idnumber}</p>
-    <p>Type of Patron: ${userData.idnumber}</p>
+    <p>Library ID: ${userData.libraryIdNo}</p>
+    <p>Type of Patron: ${userData.libraryIdNo}</p>
     <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
     <p>Department: ${userData.department}</p>
     <p>Course: ${userData.course}</p>
@@ -541,7 +541,7 @@ async function displayUserData(userData) {
 
 // // Generate QR Code and trigger download
 // async function generateQRCodeAndDownload(newEntry) {
-//   const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-Web/?idnumber=${newEntry.idnumber}&token=${newEntry.token}`;
+//   const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-Web/?libraryIdNo=${newEntry.libraryIdNo}&token=${newEntry.token}`;
 
 //   try {
 //     // Generate QR code URL
@@ -555,12 +555,12 @@ async function displayUserData(userData) {
 //       // Trigger QR code download
 //       const link = document.createElement("a");
 //       link.href = url;
-//       link.download = `QR_Code_LibraryID_${newEntry.idnumber}.png`;
+//       link.download = `QR_Code_LibraryID_${newEntry.libraryIdNo}.png`;
 //       link.click();
 
 //       // Save the QR code URL to Firestore
 //       try {
-//         const userRef = doc(db, "LIDC_Users", newEntry.idnumber);
+//         const userRef = doc(db, "LIDC_Users", newEntry.libraryIdNo);
 //         await setDoc(
 //           userRef,
 //           { qrCodeURL: fullQRCodeLink, qrImageURL: url },
@@ -580,18 +580,18 @@ async function displayUserData(userData) {
 
 // Handle URL parameters
 const urlParams = new URLSearchParams(window.location.search);
-const idnumber = urlParams.get('idnumber');
+const libraryIdNo = urlParams.get('libraryIdNo');
 const token = urlParams.get('token');
 
-if (idnumber && token) {
-  fetchUserData(idnumber).then((userData) => {
+if (libraryIdNo && token) {
+  fetchUserData(libraryIdNo).then((userData) => {
     if (userData && userData.token === token) {
       document.querySelector(".patron select").value = userData.patron;
       document.querySelector(".name-inputs .data-input:nth-child(1) input").value = userData.lastName;
       document.querySelector(".name-inputs .data-input:nth-child(2) input").value = userData.firstName;
       document.querySelector(".name-inputs .data-input:nth-child(3) input").value = userData.middleInitial;
       document.querySelector(".gender select").value = userData.gender;
-      document.getElementById("library-id").value = userData.idnumber;
+      document.getElementById("library-id").value = userData.libraryIdNo;
       document.getElementById("department-select").value = userData.department;
       updateCourses(userData.department).then(() => {
         courseSelect.value = userData.course;// Autofill Library ID and Valid Until Date
@@ -605,18 +605,18 @@ if (idnumber && token) {
           }
         
           const urlParams = new URLSearchParams(window.location.search);
-          const idnumber = urlParams.get('idnumber'); // Get ID from URL if available
+          const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
         
-          if (idnumber) {
+          if (libraryIdNo) {
             // Fetch data for the specific Library ID
             try {
-              const userRef = doc(db, "LIDC_Users", idnumber);
+              const userRef = doc(db, "LIDC_Users", libraryIdNo);
               const docSnap = await getDoc(userRef);
         
               if (docSnap.exists()) {
                 const userData = docSnap.data();
                 // Fill input fields with existing user data
-                libraryIdInput.value = userData.idnumber;
+                libraryIdInput.value = userData.libraryIdNo;
                 validUntilInput.value = userData.validUntil || "July 2025"; // Default if missing
                 displayUserData(userData); // Load other user details
               } else {
@@ -631,14 +631,14 @@ if (idnumber && token) {
             try {
               const libraryIdQuery = query(
                 collection(db, "LIDC_Users"),
-                orderBy("idnumber", "desc"),
+                orderBy("libraryIdNo", "desc"),
                 limit(1)
               );
               const querySnapshot = await getDocs(libraryIdQuery);
               let newId = "00001"; // Default ID if no data exists
               if (!querySnapshot.empty) {
                 const lastDoc = querySnapshot.docs[0];
-                const lastId = parseInt(lastDoc.data().idnumber, 10);
+                const lastId = parseInt(lastDoc.data().libraryIdNo, 10);
                 newId = (lastId + 1).toString().padStart(5, "0");
               }
               libraryIdInput.value = newId;
@@ -698,18 +698,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const urlParams = new URLSearchParams(window.location.search);
-  const idnumber = urlParams.get('idnumber'); // Get ID from URL if available
+  const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
 
-  if (idnumber) {
+  if (libraryIdNo) {
     // Fetch data for the specific Library ID
     try {
-      const userRef = doc(db, "LIDC_Users", idnumber);
+      const userRef = doc(db, "LIDC_Users", libraryIdNo);
       const docSnap = await getDoc(userRef);
 
       if (docSnap.exists()) {
         const userData = docSnap.data();
         // Fill input fields with existing user data
-        libraryIdInput.value = userData.idnumber;
+        libraryIdInput.value = userData.libraryIdNo;
         validUntilInput.value = userData.validUntil || "July 2025"; // Default if missing
         displayUserData(userData); // Load other user details
       } else {
@@ -724,14 +724,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const libraryIdQuery = query(
         collection(db, "LIDC_Users"),
-        orderBy("idnumber", "desc"),
+        orderBy("libraryIdNo", "desc"),
         limit(1)
       );
       const querySnapshot = await getDocs(libraryIdQuery);
       let newId = "00001"; // Default ID if no data exists
       if (!querySnapshot.empty) {
         const lastDoc = querySnapshot.docs[0];
-        const lastId = parseInt(lastDoc.data().idnumber, 10);
+        const lastId = parseInt(lastDoc.data().libraryIdNo, 10);
         newId = (lastId + 1).toString().padStart(5, "0");
       }
       libraryIdInput.value = newId;
