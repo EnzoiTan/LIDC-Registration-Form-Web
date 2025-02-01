@@ -240,70 +240,70 @@ document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
 
   // Function to toggle visibility based on patron type
-// const toggleFields = (patronType) => {
-//   const departmentInput = document.querySelector('.department-input');
-//   const courseInput = document.querySelector('.course-input');
-//   const majorInput = document.querySelector('.major-input');
-//   const strandInput = document.querySelector('.strand-input');
-//   const gradeInput = document.querySelector('.grade-input');
-//   const schoolSelect = document.querySelector('.school');
-//   const campusDeptInput = document.querySelector('.campusdept');
-//   const collegeInput = document.querySelector('.college');
-
-//   switch (patronType) {
-//     case 'student':
-//       departmentInput.style.display = 'block';
-//       courseInput.style.display = 'block';
-//       majorInput.style.display = 'block';
-//       strandInput.style.display = 'none';
-//       gradeInput.style.display = 'none';
-//       schoolSelect.style.display = 'none';
-//       campusDeptInput.style.display = 'none';
-//       collegeInput.style.display = 'none';
-//       break;
-//     case 'faculty':
-//       departmentInput.style.display = 'none';
-//       courseInput.style.display = 'none';
-//       majorInput.style.display = 'none';
-//       strandInput.style.display = 'none';
-//       gradeInput.style.display = 'none';
-//       schoolSelect.style.display = 'none';
-//       campusDeptInput.style.display = 'none';
-//       collegeInput.style.display = 'block';
-//       break;
-//     case 'admin':
-//       departmentInput.style.display = 'none';
-//       courseInput.style.display = 'none';
-//       majorInput.style.display = 'none';
-//       strandInput.style.display = 'none';
-//       gradeInput.style.display = 'none';
-//       schoolSelect.style.display = 'none';
-//       campusDeptInput.style.display = 'block';
-//       collegeInput.style.display = 'none';
-//       break;
-//     case 'visitor':
-//       departmentInput.style.display = 'none';
-//       courseInput.style.display = 'none';
-//       majorInput.style.display = 'none';
-//       strandInput.style.display = 'none';
-//       gradeInput.style.display = 'none';
-//       schoolSelect.style.display = 'block';
-//       campusDeptInput.style.display = 'none';
-//       collegeInput.style.display = 'none';
-//       break;
-//     default:
-//       // Default to student view
-//       departmentInput.style.display = 'block';
-//       courseInput.style.display = 'block';
-//       majorInput.style.display = 'block';
-//       strandInput.style.display = 'none';
-//       gradeInput.style.display = 'none';
-//       schoolSelect.style.display = 'none';
-//       campusDeptInput.style.display = 'none';
-//       collegeInput.style.display = 'none';
-//       break;
-//   }
-// };
+  const toggleFields = (patronType) => {
+    const departmentInput = document.querySelector('.department-input');
+    const courseInput = document.querySelector('.course-input');
+    const majorInput = document.querySelector('.major-input');
+    const strandInput = document.querySelector('.strand-input');
+    const gradeInput = document.querySelector('.grade-input');
+    const schoolSelect = document.querySelector('.school');
+    const campusDeptInput = document.querySelector('.campusdept');
+    const collegeInput = document.querySelector('.college');
+  
+    switch (patronType) {
+      case 'student':
+        departmentInput.style.display = 'block';
+        courseInput.style.display = 'block';
+        majorInput.style.display = 'block';
+        strandInput.style.display = 'none';
+        gradeInput.style.display = 'none';
+        schoolSelect.style.display = 'none';
+        campusDeptInput.style.display = 'none';
+        collegeInput.style.display = 'none';
+        break;
+      case 'faculty':
+        departmentInput.style.display = 'none';
+        courseInput.style.display = 'none';
+        majorInput.style.display = 'none';
+        strandInput.style.display = 'none';
+        gradeInput.style.display = 'none';
+        schoolSelect.style.display = 'none';
+        campusDeptInput.style.display = 'none';
+        collegeInput.style.display = 'block';
+        break;
+      case 'admin':
+        departmentInput.style.display = 'none';
+        courseInput.style.display = 'none';
+        majorInput.style.display = 'none';
+        strandInput.style.display = 'none';
+        gradeInput.style.display = 'none';
+        schoolSelect.style.display = 'none';
+        campusDeptInput.style.display = 'block';
+        collegeInput.style.display = 'none';
+        break;
+      case 'visitor':
+        departmentInput.style.display = 'none';
+        courseInput.style.display = 'none';
+        majorInput.style.display = 'none';
+        strandInput.style.display = 'none';
+        gradeInput.style.display = 'none';
+        schoolSelect.style.display = 'block';
+        campusDeptInput.style.display = 'none';
+        collegeInput.style.display = 'none';
+        break;
+      default:
+        // Default to student view
+        departmentInput.style.display = 'block';
+        courseInput.style.display = 'block';
+        majorInput.style.display = 'block';
+        strandInput.style.display = 'none';
+        gradeInput.style.display = 'none';
+        schoolSelect.style.display = 'none';
+        campusDeptInput.style.display = 'none';
+        collegeInput.style.display = 'none';
+        break;
+    }
+  };
 
 // Event listener for when patron type is changed
 document.querySelector('.patron select').addEventListener('change', (event) => {
@@ -533,6 +533,7 @@ async function fetchUserData(libraryId) {
 
     if (docSnap.exists()) {
       const userData = docSnap.data();
+      console.log("Fetched User Data:", userData); // Debugging
       displayUserData(userData);
     } else {
       console.error("No such document!");
@@ -546,21 +547,23 @@ async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
 
   // Update courses and majors based on department and course
-  await updateCourses(userData.department);
-  document.getElementById("course-select").value = userData.course;
-  await updateMajors(userData.course, userData.department);
-  document.getElementById("major-select").value = userData.major;
+  if (userData.department) {
+    await updateCourses(userData.department);
+    document.getElementById("course-select").value = userData.course || "";
+    await updateMajors(userData.course, userData.department);
+    document.getElementById("major-select").value = userData.major || "";
+  }
 
   // Display each field of the fetched user data
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
     <p>Type of Patron: ${userData.patron}</p>
     <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
-    <p>Department: ${userData.department}</p>
-    <p>Course: ${userData.course}</p>
-    <p>Major: ${userData.major}</p>
-    <p>Grade: ${userData.grade}</p>
-    <p>Strand: ${userData.strand}</p>
+    ${userData.department ? `<p>Department: ${userData.department}</p>` : ''}
+    ${userData.course ? `<p>Course: ${userData.course}</p>` : ''}
+    ${userData.major ? `<p>Major: ${userData.major}</p>` : ''}
+    ${userData.grade ? `<p>Grade: ${userData.grade}</p>` : ''}
+    ${userData.strand ? `<p>Strand: ${userData.strand}</p>` : ''}
     <p>School Year: ${userData.schoolYear}</p>
     <p>Semester: ${userData.semester}</p>
     <p>Valid Until: ${userData.validUntil}</p>
@@ -572,7 +575,23 @@ async function displayUserData(userData) {
         .map((timestamp) => `<li>${new Date(timestamp).toLocaleString()}</li>`)
         .join("")}
     </ul>
+    ${userData.collegeSelect ? `<p>College: ${userData.collegeSelect}</p>` : ''}
+    ${userData.schoolSelect ? `<p>School: ${userData.schoolSelect}</p>` : ''}
+    ${userData.specifySchool ? `<p>Specify School: ${userData.specifySchool}</p>` : ''}
+    ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
   `;
+
+  // Populate fields based on patron type
+  if (userData.patron === 'faculty') {
+    document.querySelector(".college select").value = userData.collegeSelect || "";
+  } else if (userData.patron === 'admin') {
+    document.querySelector(".campusdept select").value = userData.campusDept || "";
+  } else if (userData.patron === 'visitor') {
+    document.getElementById("school-select").value = userData.schoolSelect || "";
+    if (userData.schoolSelect === 'other') {
+      document.getElementById("specify-school-input").value = userData.specifySchool || "";
+    }
+  }
 }
 
 // Handle URL parameters

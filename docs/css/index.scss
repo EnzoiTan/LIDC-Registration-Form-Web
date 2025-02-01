@@ -3,6 +3,18 @@
     margin: 0;
 }
 
+/* Debugging: Show all fields */
+.department-input,
+.course-input,
+.major-input,
+.grade-input,
+.strand-input,
+.school,
+.campusdept,
+.college {
+  display: block !important;
+}
+
 body{
     background-color: #f1f1f1;
     font-family: Arial, sans-serif;
