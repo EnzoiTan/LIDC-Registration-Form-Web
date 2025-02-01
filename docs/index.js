@@ -494,66 +494,6 @@ document.getElementById("school-select").addEventListener("change", (event) => {
   }
 });
 
-async function updateSchools() {
-  const schoolSelect = document.getElementById("school");
-  schoolSelect.innerHTML = '<option value="" disabled selected>Select School</option>';
-
-  // Example data for schools (replace with your actual data)
-  const schools = [
-    { value: "wmsu", text: "Western Mindanao State University" },
-    { value: "zscmst", text: "Zamboanga State College of Marine Sciences and Technology" },
-    { value: "uz", text: "Universidad de Zamboanga" },
-    { value: "other", text: "Other" },
-  ];
-
-  schools.forEach((school) => {
-    const option = document.createElement("option");
-    option.value = school.value;
-    option.textContent = school.text;
-    schoolSelect.appendChild(option);
-  });
-}
-
-// Function to populate the college dropdown
-async function updateColleges() {
-  const collegeSelect = document.getElementById("collegSelect");
-  collegeSelect.innerHTML = '<option value="" disabled selected>Select College</option>';
-
-  // Example data for colleges (replace with your actual data)
-  const colleges = [
-    { value: "cics", text: "College of Information in Computing Sciences (CICS)" },
-    { value: "cte", text: "College of Teacher Education (CTE)" },
-    { value: "cet", text: "College of Engineering and Technology (CET)" },
-  ];
-
-  colleges.forEach((college) => {
-    const option = document.createElement("option");
-    option.value = college.value;
-    option.textContent = college.text;
-    collegeSelect.appendChild(option);
-  });
-}
-
-// Function to populate the campus department dropdown
-async function updateCampusDepts() {
-  const campusDeptSelect = document.getElementById("campusdept-select");
-  campusDeptSelect.innerHTML = '<option value="" disabled selected>Select Campus Department</option>';
-
-  // Example data for campus departments (replace with your actual data)
-  const campusDepts = [
-    { value: "Registrar", text: "Registrar" },
-    { value: "Medical and Dental Clinic", text: "Medical and Dental Clinic" },
-    { value: "Cashier", text: "Cashier" },
-  ];
-
-  campusDepts.forEach((dept) => {
-    const option = document.createElement("option");
-    option.value = dept.value;
-    option.textContent = dept.text;
-    campusDeptSelect.appendChild(option);
-  });
-}
-
 
 
 // Generate QR code and return as Base64 data URL
@@ -599,40 +539,30 @@ async function fetchUserData(libraryId) {
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
 
-  // Check if the userDataDiv exists
-  if (!userDataDiv) {
-    console.error("Element with ID 'user-data' not found in the DOM.");
-    return;
-  }
-
-  // Get values from the input elements
-  const department = document.getElementById("department-select").value;
-  const course = document.getElementById("course-select").value;
-  const major = document.getElementById("major-select").value;
-  const strand = document.getElementById("strand-select").value;
-  const grade = document.getElementById("grade-select").value;
-  const school = document.getElementById("school-select").value;
-  const campusDept = document.getElementById("campusdept-select").value;
-  const college = document.getElementById("college-select").value;
+  // Update courses and majors based on department and course
+  await updateCourses(userData.department);
+  document.getElementById("course-select").value = userData.course;
+  await updateMajors(userData.course, userData.department);
+  document.getElementById("major-select").value = userData.major;
 
   // Display each field of the fetched user data
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
     <p>Type of Patron: ${userData.patron}</p>
     <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
-    <p>Department: ${department}</p>
-    <p>Course: ${course}</p>
-    <p>Major: ${major}</p>
-    <p>Grade: ${grade}</p>
-    <p>Strand: ${strand}</p>
+    <p>Department: ${userData.department}</p>
+    <p>Course: ${userData.course}</p>
+    <p>Major: ${userData.major}</p>
+    <p>Grade: ${userData.grade}</p>
+    <p>Strand: ${userData.strand}</p>
+    <p>School: ${userData.schoolSelect}</p>
+    <p>Offices: ${userData.campusDept}</p>
+    <p>College/Department: ${userData.collegeSelect}</p>
     <p>School Year: ${userData.schoolYear}</p>
     <p>Semester: ${userData.semester}</p>
     <p>Valid Until: ${userData.validUntil}</p>
     <p>Token: ${userData.token}</p>
     <p>Times Entered: ${userData.timesEntered}</p>
-    <p>School: ${school}</p>
-    <p>College: ${college}</p>
-    <p>Campus Department: ${campusDept}</p>
     <p>Entry Timestamps:</p>
     <ul>
       ${userData.entryTimestamps
