@@ -435,8 +435,8 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     }
 
     // You can also generate QR code for this entry and save it
-    const fullQRCodeLink = `https://enzoitan.github.io/LIDC-Registration-Form-Web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
-    const qrCodeData = await generateQRCodeData(fullQRCodeLink);
+    const fullQRCodeLink = `https://enzoitan.github.io/LIDC-Registration-Form-Web//?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
+    const qrCodeData = await generateQRCodeAndDownload(fullQRCodeLink);
 
     // Save the QR code data to Firestore
     await setDoc(userRef, {
@@ -464,22 +464,6 @@ document.getElementById("school-select").addEventListener("change", (event) => {
     specifySchoolInput.style.display = "none"; // Hide the input field
   }
 });
-
-
-
-// Generate QR code and return as Base64 data URL
-async function generateQRCodeData(data) {
-  try {
-    const qrDataURL = await QRCode.toDataURL(JSON.stringify(data), {
-      width: 256,
-      margin: 1,
-    });
-    return qrDataURL;
-  } catch (error) {
-    console.error("Error generating QR Code:", error);
-    throw error;
-  }
-}
 
 
 // Auto-download the QR code
@@ -548,7 +532,7 @@ async function displayUserData(userData) {
 
 // Generate QR Code and trigger download
 async function generateQRCodeAndDownload(newEntry) {
-  const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-web/?libraryIdNo=${newEntry.libraryIdNo}&token=${newEntry.token}`;
+  const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-Web/?libraryIdNo=${newEntry.libraryIdNo}&token=${newEntry.token}`;
 
   try {
     // Generate QR code URL
