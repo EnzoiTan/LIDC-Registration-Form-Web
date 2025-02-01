@@ -495,7 +495,7 @@ document.getElementById("school-select").addEventListener("change", (event) => {
 });
 
 async function updateSchools() {
-  const schoolSelect = document.getElementById(".school");
+  const schoolSelect = document.getElementById("school");
   schoolSelect.innerHTML = '<option value="" disabled selected>Select School</option>';
 
   // Example data for schools (replace with your actual data)
@@ -516,7 +516,7 @@ async function updateSchools() {
 
 // Function to populate the college dropdown
 async function updateColleges() {
-  const collegeSelect = document.getElementById(".college");
+  const collegeSelect = document.getElementById("collegSelect");
   collegeSelect.innerHTML = '<option value="" disabled selected>Select College</option>';
 
   // Example data for colleges (replace with your actual data)
@@ -536,7 +536,7 @@ async function updateColleges() {
 
 // Function to populate the campus department dropdown
 async function updateCampusDepts() {
-  const campusDeptSelect = document.getElementById(".campusdept");
+  const campusDeptSelect = document.getElementById("campusdept-select");
   campusDeptSelect.innerHTML = '<option value="" disabled selected>Select Campus Department</option>';
 
   // Example data for campus departments (replace with your actual data)
@@ -605,37 +605,34 @@ async function displayUserData(userData) {
     return;
   }
 
-  // Update courses and majors based on department and course
-  await updateCourses(userData.department);
-  document.getElementById("course-select").value = userData.course;
-  await updateMajors(userData.course, userData.department);
-  document.getElementById("major-select").value = userData.major;
-
-  // Update school, college, and campus department dropdowns
-  await updateSchools();
-  document.getElementById("school-select").value = userData.schoolSelect;
-
-  await updateColleges();
-  document.getElementById("college-select").value = userData.collegeSelect;
-
-  await updateCampusDepts();
-  document.getElementById("campusdept-select").value = userData.campusDept;
+  // Get values from the input elements
+  const department = document.getElementById("department-select").value;
+  const course = document.getElementById("course-select").value;
+  const major = document.getElementById("major-select").value;
+  const strand = document.getElementById("strand-select").value;
+  const grade = document.getElementById("grade-select").value;
+  const school = document.getElementById("school-select").value;
+  const campusDept = document.getElementById("campusdept-select").value;
+  const college = document.getElementById("college-select").value;
 
   // Display each field of the fetched user data
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
     <p>Type of Patron: ${userData.patron}</p>
     <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
-    <p>Department: ${userData.department}</p>
-    <p>Course: ${userData.course}</p>
-    <p>Major: ${userData.major}</p>
-    <p>Grade: ${userData.grade}</p>
-    <p>Strand: ${userData.strand}</p>
+    <p>Department: ${department}</p>
+    <p>Course: ${course}</p>
+    <p>Major: ${major}</p>
+    <p>Grade: ${grade}</p>
+    <p>Strand: ${strand}</p>
     <p>School Year: ${userData.schoolYear}</p>
     <p>Semester: ${userData.semester}</p>
     <p>Valid Until: ${userData.validUntil}</p>
     <p>Token: ${userData.token}</p>
     <p>Times Entered: ${userData.timesEntered}</p>
+    <p>School: ${school}</p>
+    <p>College: ${college}</p>
+    <p>Campus Department: ${campusDept}</p>
     <p>Entry Timestamps:</p>
     <ul>
       ${userData.entryTimestamps
