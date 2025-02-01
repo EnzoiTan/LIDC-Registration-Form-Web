@@ -539,6 +539,12 @@ async function fetchUserData(libraryId) {
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
 
+  // Update courses and majors based on department and course
+  await updateCourses(userData.department);
+  document.getElementById("course-select").value = userData.course;
+  await updateMajors(userData.course, userData.department);
+  document.getElementById("major-select").value = userData.major;
+
   // Display each field of the fetched user data
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
@@ -588,9 +594,9 @@ async function displayUserData(userData) {
   collegeInput.style.display = 'none';
 
   // Bind fetched data to input/select fields
-  document.getElementById('school-select').value = userData.schoolSelect || '';
-  document.getElementById('campusdept-select').value = userData.campusDept || '';
-  document.getElementById('college-select').value = userData.collegeSelect || '';
+  document.getElementById('.school').value = userData.schoolSelect || '';
+  document.getElementById('.campusdept').value = userData.campusDept || '';
+  document.getElementById('.college').value = userData.collegeSelect || '';
 
   // Show fields based on patron type
   switch (patronType) {
