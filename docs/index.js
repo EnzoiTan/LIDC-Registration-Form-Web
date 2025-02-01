@@ -409,45 +409,38 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     strand: department === "shs" ? strand : "", // Only save strand if SHS
     schoolYear,
     semester,
-    timesEntered: 1, // Start timesEntered with 1
+    timesEntered: 1, // Default for new users
     token: generateRandomToken(),
-    timestamp: new Date(), // Save the timestamp of submission
-    collegeSelect, // Selected college/department
-    schoolSelect, // Selected school
-    specifySchool: schoolSelect === "other" ? specifySchoolInput : "", // Specify school if "Other" is selected
-    campusDept, // Selected campus department
+    timestamp: new Date(),
+    collegeSelect,
+    schoolSelect,
+    specifySchool: schoolSelect === "other" ? specifySchoolInput : "",
+    campusDept,
   };
 
   try {
-    const userRef = doc(db, "LIDC_Users", libraryIdNo); // Reference to Firestore document
-
-    // Check if the user already exists (if they do, update their document)
+    const userRef = doc(db, "LIDC_Users", libraryIdNo);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
-      // If user already exists, update their document
-      await setDoc(userRef, userData, { merge: true }); // merge to update only necessary fields
+      // Increment timesEntered for existing users
+      const existingTimesEntered = userSnap.data().timesEntered || 0;
+      await setDoc(userRef, { timesEntered: existingTimesEntered + 1 }, { merge: true });
       alert("Welcome back! Your entry has been recorded.");
     } else {
-      // If new user, create a new document
-      await setDoc(userRef, userData); // Create new document
+      // Create new user with all data
+      await setDoc(userRef, userData);
+      // Generate and save QR code for new users
+      const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-Web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
+      const qrCodeData = await generateQRCodeData(fullQRCodeLink);
+      await setDoc(userRef, {
+        qrCodeURL: fullQRCodeLink,
+        qrCodeImage: qrCodeData
+      }, { merge: true });
+      downloadQRCode(qrCodeData, `${libraryIdNo}.png`);
       alert("Data successfully submitted!");
     }
 
-    // You can also generate QR code for this entry and save it
-    const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-Web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
-    const qrCodeData = await generateQRCodeData(fullQRCodeLink);
-
-    // Save the QR code data to Firestore
-    await setDoc(userRef, {
-      qrCodeURL: fullQRCodeLink,
-      qrCodeImage: qrCodeData
-    }, { merge: true });
-
-    // Trigger the download of QR code
-    downloadQRCode(qrCodeData, `${libraryIdNo}.png`);
-
-    // Reload the page after successful submission
     window.location.reload();
   } catch (error) {
     console.error("Error storing data:", error);
@@ -546,43 +539,43 @@ async function displayUserData(userData) {
   }
 }
 
-// Generate QR Code and trigger download
-async function generateQRCodeAndDownload(newEntry) {
-  const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-Web/?libraryIdNo=${newEntry.libraryIdNo}&token=${newEntry.token}`;
+// // Generate QR Code and trigger download
+// async function generateQRCodeAndDownload(newEntry) {
+//   const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-Web/?libraryIdNo=${newEntry.libraryIdNo}&token=${newEntry.token}`;
 
-  try {
-    // Generate QR code URL
-    QRCode.toDataURL(fullQRCodeLink, async (err, url) => {
-      if (err) {
-        console.error("Error generating QR code:", err);
-        alert("Failed to generate QR code. Please try again.");
-        return;
-      }
+//   try {
+//     // Generate QR code URL
+//     QRCode.toDataURL(fullQRCodeLink, async (err, url) => {
+//       if (err) {
+//         console.error("Error generating QR code:", err);
+//         alert("Failed to generate QR code. Please try again.");
+//         return;
+//       }
 
-      // Trigger QR code download
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `QR_Code_LibraryID_${newEntry.libraryIdNo}.png`;
-      link.click();
+//       // Trigger QR code download
+//       const link = document.createElement("a");
+//       link.href = url;
+//       link.download = `QR_Code_LibraryID_${newEntry.libraryIdNo}.png`;
+//       link.click();
 
-      // Save the QR code URL to Firestore
-      try {
-        const userRef = doc(db, "LIDC_Users", newEntry.libraryIdNo);
-        await setDoc(
-          userRef,
-          { qrCodeURL: fullQRCodeLink, qrImageURL: url },
-          { merge: true }
-        );
-        console.log("QR code URL and image data saved to Firestore.");
-      } catch (error) {
-        console.error("Error saving QR code to Firestore:", error);
-        alert("Failed to save QR code to Firestore.");
-      }
-    });
-  } catch (error) {
-    console.error("Unexpected error generating QR code:", error);
-  }
-}
+//       // Save the QR code URL to Firestore
+//       try {
+//         const userRef = doc(db, "LIDC_Users", newEntry.libraryIdNo);
+//         await setDoc(
+//           userRef,
+//           { qrCodeURL: fullQRCodeLink, qrImageURL: url },
+//           { merge: true }
+//         );
+//         console.log("QR code URL and image data saved to Firestore.");
+//       } catch (error) {
+//         console.error("Error saving QR code to Firestore:", error);
+//         alert("Failed to save QR code to Firestore.");
+//       }
+//     });
+//   } catch (error) {
+//     console.error("Unexpected error generating QR code:", error);
+//   }
+// }
 
 
 // Handle URL parameters
