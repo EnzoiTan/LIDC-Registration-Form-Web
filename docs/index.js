@@ -577,9 +577,9 @@ async function displayUserData(userData) {
   const majorInput = document.querySelector('.major-input');
   const strandInput = document.querySelector('.strand-input');
   const gradeInput = document.querySelector('.grade-input');
-  const schoolSelect = document.querySelector('.school');
-  const campusDeptInput = document.querySelector('.campusdept');
-  const collegeInput = document.querySelector('.college');
+  const schoolSelect = document.querySelector('.school').value = userData.schoolSelect || '';
+  const campusDeptInput = document.querySelector('.campusdept').value = userData.campusDept || '';
+  const collegeInput = document.querySelector('.college').value = userData.collegeSelect || '';
 
   const patronType = userData.patron.toLowerCase();
 
@@ -592,11 +592,6 @@ async function displayUserData(userData) {
   schoolSelect.style.display = 'none';
   campusDeptInput.style.display = 'none';
   collegeInput.style.display = 'none';
-
-  // Bind fetched data to input/select fields
-  document.getElementById('.school select').value = userData.schoolSelect || '';
-  document.getElementById('.campusdept select').value = userData.campusDept || '';
-  document.getElementById('.college select').value = userData.collegeSelect || '';
 
   // Show fields based on patron type
   switch (patronType) {
