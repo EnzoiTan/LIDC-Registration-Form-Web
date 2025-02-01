@@ -240,51 +240,72 @@ document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
 
   // Function to toggle visibility based on patron type
-  const toggleFields = (patronType) => {
-    switch (patronType) {
-      case 'visitor':
-        departmentInput.style.display = 'none';
-        courseInput.style.display = 'none';
-        majorInput.style.display = 'none';
-        strandInput.style.display = 'none';
-        gradeInput.style.display = 'none';
-        schoolSelect.style.display = 'block';
-        campusDeptInput.style.display = 'none';
-        collegeInput.style.display = 'none';
-        toggleSpecifySchoolInput(); // Call this to ensure "Specify School" toggles properly
-        break;
-      case 'faculty':
-        departmentInput.style.display = 'none';
-        courseInput.style.display = 'none';
-        majorInput.style.display = 'none';
-        strandInput.style.display = 'none';
-        gradeInput.style.display = 'none';
-        schoolSelect.style.display = 'none';
-        campusDeptInput.style.display = 'none';
-        collegeInput.style.display = 'block';
-        break;
-      case 'admin':
-        departmentInput.style.display = 'none';
-        courseInput.style.display = 'none';
-        majorInput.style.display = 'none';
-        strandInput.style.display = 'none';
-        gradeInput.style.display = 'none';
-        schoolSelect.style.display = 'none';
-        campusDeptInput.style.display = 'block';
-        collegeInput.style.display = 'none';
-        break;
-      default: // student
-        departmentInput.style.display = 'block';
-        courseInput.style.display = 'block';
-        majorInput.style.display = 'block';
-        strandInput.style.display = 'none';
-        gradeInput.style.display = 'none';
-        schoolSelect.style.display = 'none';
-        campusDeptInput.style.display = 'none';
-        collegeInput.style.display = 'none'; // Hide college input for students
-        break;
-    }
-  };
+const toggleFields = (patronType) => {
+  const departmentInput = document.querySelector('.department-input');
+  const courseInput = document.querySelector('.course-input');
+  const majorInput = document.querySelector('.major-input');
+  const strandInput = document.querySelector('.strand-input');
+  const gradeInput = document.querySelector('.grade-input');
+  const schoolSelect = document.querySelector('.school');
+  const campusDeptInput = document.querySelector('.campusdept');
+  const collegeInput = document.querySelector('.college');
+
+  switch (patronType) {
+    default: // student
+      departmentInput.style.display = 'block';
+      courseInput.style.display = 'block';
+      majorInput.style.display = 'block';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'none';
+      break;
+    case 'faculty':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'block';
+      break;
+    case 'admin':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'block';
+      collegeInput.style.display = 'none';
+      break;
+    case 'visitor':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'block';
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'none';
+      break;
+  }
+};
+
+// Event listener for when patron type is changed
+document.querySelector('.patron select').addEventListener('change', (event) => {
+  toggleFields(event.target.value);
+});
+
+// Initialize fields based on default patron type
+document.addEventListener("DOMContentLoaded", () => {
+  const patronSelect = document.querySelector('.patron select');
+  if (patronSelect) {
+    toggleFields(patronSelect.value);
+  }
+});
 
   const toggleSpecifySchoolInput = () => {
     if (schoolSelected && schoolSelected.value === 'other') {
@@ -560,13 +581,13 @@ async function displayUserData(userData) {
   const patronType = userData.patron.toLowerCase();
 
   switch (patronType) {
-    case 'visitor':
-      departmentInput.style.display = 'none';
-      courseInput.style.display = 'none';
-      majorInput.style.display = 'none';
+    default: // student
+      departmentInput.style.display = 'block';
+      courseInput.style.display = 'block';
+      majorInput.style.display = 'block';
       strandInput.style.display = 'none';
       gradeInput.style.display = 'none';
-      schoolSelect.style.display = 'block';
+      schoolSelect.style.display = 'none';
       campusDeptInput.style.display = 'none';
       collegeInput.style.display = 'none';
       break;
@@ -590,57 +611,18 @@ async function displayUserData(userData) {
       campusDeptInput.style.display = 'block';
       collegeInput.style.display = 'none';
       break;
-    default: // student
-      departmentInput.style.display = 'block';
-      courseInput.style.display = 'block';
-      majorInput.style.display = 'block';
+    case 'visitor':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
       strandInput.style.display = 'none';
       gradeInput.style.display = 'none';
-      schoolSelect.style.display = 'none';
+      schoolSelect.style.display = 'block';
       campusDeptInput.style.display = 'none';
       collegeInput.style.display = 'none';
       break;
   }
 }
-
-// // Generate QR Code and trigger download
-// async function generateQRCodeAndDownload(newEntry) {
-//   const fullQRCodeLink = `https://enzoitan.github.io/LCC-Registration-Form-Web/?libraryIdNo=${newEntry.libraryIdNo}&token=${newEntry.token}`;
-
-//   try {
-//     // Generate QR code URL
-//     QRCode.toDataURL(fullQRCodeLink, async (err, url) => {
-//       if (err) {
-//         console.error("Error generating QR code:", err);
-//         alert("Failed to generate QR code. Please try again.");
-//         return;
-//       }
-
-//       // Trigger QR code download
-//       const link = document.createElement("a");
-//       link.href = url;
-//       link.download = `QR_Code_LibraryID_${newEntry.libraryIdNo}.png`;
-//       link.click();
-
-//       // Save the QR code URL to Firestore
-//       try {
-//         const userRef = doc(db, "LIDC_Users", newEntry.libraryIdNo);
-//         await setDoc(
-//           userRef,
-//           { qrCodeURL: fullQRCodeLink, qrImageURL: url },
-//           { merge: true }
-//         );
-//         console.log("QR code URL and image data saved to Firestore.");
-//       } catch (error) {
-//         console.error("Error saving QR code to Firestore:", error);
-//         alert("Failed to save QR code to Firestore.");
-//       }
-//     });
-//   } catch (error) {
-//     console.error("Unexpected error generating QR code:", error);
-//   }
-// }
-
 
 // Handle URL parameters
 const urlParams = new URLSearchParams(window.location.search);
