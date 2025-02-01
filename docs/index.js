@@ -575,11 +575,11 @@ async function displayUserData(userData) {
 
   // Populate fields based on patron type
   if (userData.patron === 'faculty') {
-    document.querySelector(".college-select").value = userData.collegeSelect || "";
+    document.querySelector(".college").value = userData.collegeSelect || "";
   } else if (userData.patron === 'admin') {
-    document.querySelector(".campusdept-select").value = userData.campusDept || "";
+    document.querySelector(".campusdept").value = userData.campusDept || "";
   } else if (userData.patron === 'visitor') {
-    document.getElementById("school-select").value = userData.schoolSelect || "";
+    document.getElementById(".school").value = userData.schoolSelect || "";
     if (userData.schoolSelect === 'other') {
       document.getElementById("specify-school-input").value = userData.specifySchool || "";
     }
