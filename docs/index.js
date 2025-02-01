@@ -535,6 +535,11 @@ async function fetchUserData(libraryId) {
   }
 }
 
+function toggleFields(patronType) {
+  // Add logic to toggle fields based on patron type
+  console.log(`Toggling fields for ${patronType}`);
+}
+
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
 
