@@ -564,31 +564,6 @@ async function displayUserData(userData) {
   toggleFields(userData.patron);
 }
 
-async function populateSelect(selectClass, collectionName, selectedValue) {
-  const selectElement = document.querySelector(`.${selectClass}`);
-  if (!selectElement) return;
-
-  // Clear existing options
-  selectElement.innerHTML = '<option value="">Select</option>';
-
-  // Fetch data from Firestore
-  const querySnapshot = await getDocs(collection(db, collectionName));
-  
-  querySnapshot.forEach((doc) => {
-    const option = document.createElement("option");
-    option.value = doc.id;
-    option.textContent = doc.data().name;
-
-    // Set the selected value if it matches
-    if (doc.id === selectedValue) {
-      option.selected = true;
-    }
-
-    selectElement.appendChild(option);
-  });
-}
-
-
 // Handle URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 const libraryIdNo = urlParams.get('libraryIdNo');
