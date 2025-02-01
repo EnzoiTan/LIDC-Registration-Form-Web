@@ -239,46 +239,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
 
-  // Function to toggle visibility based on patron type
-  function toggleFields(patronType) {
-    const departmentInput = document.querySelector('.department-input');
-    const courseInput = document.querySelector('.course-input');
-    const majorInput = document.querySelector('.major-input');
-    const strandInput = document.querySelector('.strand-input');
-    const gradeInput = document.querySelector('.grade-input');
-    const schoolSelect = document.querySelector('.school');
-    const campusDeptInput = document.querySelector('.campusdept');
-    const collegeInput = document.querySelector('.college');
-  
-    // Reset all fields to hidden initially
-    departmentInput.style.display = 'none';
-    courseInput.style.display = 'none';
-    majorInput.style.display = 'none';
-    strandInput.style.display = 'none';
-    gradeInput.style.display = 'none';
-    schoolSelect.style.display = 'none';
-    campusDeptInput.style.display = 'none';
-    collegeInput.style.display = 'none';
-  
-    // Show relevant fields based on patron type
-    switch (patronType) {
-      case 'faculty':
-        collegeInput.style.display = 'block';
-        break;
-      case 'admin':
-        campusDeptInput.style.display = 'block';
-        break;
-      case 'visitor':
-        schoolSelect.style.display = 'block';
-        break;
-      default:
-        departmentInput.style.display = 'block';
-        courseInput.style.display = 'block';
-        majorInput.style.display = 'block';
-        break;
-    }
-  }
-
 // Event listener for when patron type is changed
 document.querySelector('.patron select').addEventListener('change', (event) => {
   toggleFields(event.target.value);
@@ -516,6 +476,46 @@ async function fetchUserData(libraryId) {
     }
   } catch (error) {
     console.error("Error fetching user data:", error);
+  }
+}
+
+// Function to toggle visibility based on patron type
+function toggleFields(patronType) {
+  const departmentInput = document.querySelector('.department-input');
+  const courseInput = document.querySelector('.course-input');
+  const majorInput = document.querySelector('.major-input');
+  const strandInput = document.querySelector('.strand-input');
+  const gradeInput = document.querySelector('.grade-input');
+  const schoolSelect = document.querySelector('.school');
+  const campusDeptInput = document.querySelector('.campusdept');
+  const collegeInput = document.querySelector('.college');
+
+  // Reset all fields to hidden initially
+  departmentInput.style.display = 'none';
+  courseInput.style.display = 'none';
+  majorInput.style.display = 'none';
+  strandInput.style.display = 'none';
+  gradeInput.style.display = 'none';
+  schoolSelect.style.display = 'none';
+  campusDeptInput.style.display = 'none';
+  collegeInput.style.display = 'none';
+
+  // Show relevant fields based on patron type
+  switch (patronType) {
+    case 'faculty':
+      collegeInput.style.display = 'block';
+      break;
+    case 'admin':
+      campusDeptInput.style.display = 'block';
+      break;
+    case 'visitor':
+      schoolSelect.style.display = 'block';
+      break;
+    default:
+      departmentInput.style.display = 'block';
+      courseInput.style.display = 'block';
+      majorInput.style.display = 'block';
+      break;
   }
 }
 
