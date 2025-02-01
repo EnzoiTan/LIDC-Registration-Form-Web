@@ -240,59 +240,70 @@ document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
 
   // Function to toggle visibility based on patron type
-const toggleFields = (patronType) => {
-  const departmentInput = document.querySelector('.department-input');
-  const courseInput = document.querySelector('.course-input');
-  const majorInput = document.querySelector('.major-input');
-  const strandInput = document.querySelector('.strand-input');
-  const gradeInput = document.querySelector('.grade-input');
-  const schoolSelect = document.querySelector('.school');
-  const campusDeptInput = document.querySelector('.campusdept');
-  const collegeInput = document.querySelector('.college');
-
-  switch (patronType) {
-    default: // student
-      departmentInput.style.display = 'block';
-      courseInput.style.display = 'block';
-      majorInput.style.display = 'block';
-      strandInput.style.display = 'none';
-      gradeInput.style.display = 'none';
-      schoolSelect.style.display = 'none';
-      campusDeptInput.style.display = 'none';
-      collegeInput.style.display = 'none';
-      break;
-    case 'faculty':
-      departmentInput.style.display = 'none';
-      courseInput.style.display = 'none';
-      majorInput.style.display = 'none';
-      strandInput.style.display = 'none';
-      gradeInput.style.display = 'none';
-      schoolSelect.style.display = 'none';
-      campusDeptInput.style.display = 'none';
-      collegeInput.style.display = 'block';
-      break;
-    case 'admin':
-      departmentInput.style.display = 'none';
-      courseInput.style.display = 'none';
-      majorInput.style.display = 'none';
-      strandInput.style.display = 'none';
-      gradeInput.style.display = 'none';
-      schoolSelect.style.display = 'none';
-      campusDeptInput.style.display = 'block';
-      collegeInput.style.display = 'none';
-      break;
-    case 'visitor':
-      departmentInput.style.display = 'none';
-      courseInput.style.display = 'none';
-      majorInput.style.display = 'none';
-      strandInput.style.display = 'none';
-      gradeInput.style.display = 'none';
-      schoolSelect.style.display = 'block';
-      campusDeptInput.style.display = 'none';
-      collegeInput.style.display = 'none';
-      break;
-  }
-};
+  const toggleFields = (patronType) => {
+    const departmentInput = document.querySelector('.department-input');
+    const courseInput = document.querySelector('.course-input');
+    const majorInput = document.querySelector('.major-input');
+    const strandInput = document.querySelector('.strand-input');
+    const gradeInput = document.querySelector('.grade-input');
+    const schoolSelect = document.querySelector('.school');
+    const campusDeptInput = document.querySelector('.campusdept');
+    const collegeInput = document.querySelector('.college');
+  
+    switch (patronType) {
+      case 'student':
+        departmentInput.style.display = 'block';
+        courseInput.style.display = 'block';
+        majorInput.style.display = 'block';
+        strandInput.style.display = 'none';
+        gradeInput.style.display = 'none';
+        schoolSelect.style.display = 'none';
+        campusDeptInput.style.display = 'none';
+        collegeInput.style.display = 'none';
+        break;
+      case 'faculty':
+        departmentInput.style.display = 'none';
+        courseInput.style.display = 'none';
+        majorInput.style.display = 'none';
+        strandInput.style.display = 'none';
+        gradeInput.style.display = 'none';
+        schoolSelect.style.display = 'none';
+        campusDeptInput.style.display = 'none';
+        collegeInput.style.display = 'block';
+        break;
+      case 'admin':
+        departmentInput.style.display = 'none';
+        courseInput.style.display = 'none';
+        majorInput.style.display = 'none';
+        strandInput.style.display = 'none';
+        gradeInput.style.display = 'none';
+        schoolSelect.style.display = 'none';
+        campusDeptInput.style.display = 'block';
+        collegeInput.style.display = 'none';
+        break;
+      case 'visitor':
+        departmentInput.style.display = 'none';
+        courseInput.style.display = 'none';
+        majorInput.style.display = 'none';
+        strandInput.style.display = 'none';
+        gradeInput.style.display = 'none';
+        schoolSelect.style.display = 'block';
+        campusDeptInput.style.display = 'none';
+        collegeInput.style.display = 'none';
+        break;
+      default:
+        // Default to student view
+        departmentInput.style.display = 'block';
+        courseInput.style.display = 'block';
+        majorInput.style.display = 'block';
+        strandInput.style.display = 'none';
+        gradeInput.style.display = 'none';
+        schoolSelect.style.display = 'none';
+        campusDeptInput.style.display = 'none';
+        collegeInput.style.display = 'none';
+        break;
+    }
+  };
 
 // Event listener for when patron type is changed
 document.querySelector('.patron select').addEventListener('change', (event) => {
@@ -391,7 +402,6 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
   // Collecting general data
   const libraryIdInput = document.getElementById("library-id");
   const validUntilInput = document.getElementById("valid-until");
-  
   const patron = document.querySelector(".patron select").value.trim();
   const lastName = document.querySelector(".name-inputs .data-input:nth-child(1) input").value.trim();
   const firstName = document.querySelector(".name-inputs .data-input:nth-child(2) input").value.trim();
@@ -409,10 +419,10 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
   const validUntil = validUntilInput.value.trim();
 
   // Collecting additional admin-related data
-  const collegeSelect = document.querySelector(".data-input.college select").value.trim(); // Department/College
-  const schoolSelect = document.getElementById("school-select").value.trim(); // School
-  const specifySchoolInput = document.getElementById("specify-school-input").value.trim(); // If "Other" is selected
-  const campusDept = document.querySelector(".data-input.campusdept select").value.trim(); // Campus Department
+  const collegeSelect = document.querySelector(".data-input.college select")?.value.trim() || ""; // Department/College
+  const schoolSelect = document.getElementById("school-select")?.value.trim() || ""; // School
+  const specifySchoolInput = document.getElementById("specify-school-input")?.value.trim() || ""; // If "Other" is selected
+  const campusDept = document.querySelector(".data-input.campusdept select")?.value.trim() || ""; // Campus Department
 
   // Prepare the data object to store in Firestore
   const userData = {
@@ -494,8 +504,6 @@ document.getElementById("school-select").addEventListener("change", (event) => {
   }
 });
 
-
-
 // Generate QR code and return as Base64 data URL
 async function generateQRCodeData(data) {
   try {
@@ -509,7 +517,6 @@ async function generateQRCodeData(data) {
     throw error;
   }
 }
-
 
 // Auto-download the QR code
 function downloadQRCode(dataURL, filename) {
@@ -565,6 +572,10 @@ async function displayUserData(userData) {
         .map((timestamp) => `<li>${new Date(timestamp).toLocaleString()}</li>`)
         .join("")}
     </ul>
+    ${userData.collegeSelect ? `<p>College: ${userData.collegeSelect}</p>` : ''}
+    ${userData.schoolSelect ? `<p>School: ${userData.schoolSelect}</p>` : ''}
+    ${userData.specifySchool ? `<p>Specify School: ${userData.specifySchool}</p>` : ''}
+    ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
   `;
 }
 
@@ -584,73 +595,9 @@ if (libraryIdNo && token) {
       document.getElementById("library-id").value = userData.libraryIdNo;
       document.getElementById("department-select").value = userData.department;
       updateCourses(userData.department).then(() => {
-        courseSelect.value = userData.course;// Autofill Library ID and Valid Until Date
-        document.addEventListener("DOMContentLoaded", async () => {
-          const libraryIdInput = document.getElementById("library-id");
-          const validUntilInput = document.getElementById("valid-until");
-        
-          if (!libraryIdInput || !validUntilInput) {
-            console.error("One or more required DOM elements are missing.");
-            return;
-          }
-        
-          const urlParams = new URLSearchParams(window.location.search);
-          const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
-        
-          if (libraryIdNo) {
-            // Fetch data for the specific Library ID
-            try {
-              const userRef = doc(db, "LIDC_Users", libraryIdNo);
-              const docSnap = await getDoc(userRef);
-        
-              if (docSnap.exists()) {
-                const userData = docSnap.data();
-                // Fill input fields with existing user data
-                libraryIdInput.value = userData.libraryIdNo;
-                validUntilInput.value = userData.validUntil || "July 2025"; // Default if missing
-                displayUserData(userData); // Load other user details
-              } else {
-                console.error("No data found for the given Library ID.");
-                alert("User not found.");
-              }
-            } catch (error) {
-              console.error("Error fetching user data:", error);
-            }
-          } else {
-            // Generate a new Library ID
-            try {
-              const libraryIdQuery = query(
-                collection(db, "LIDC_Users"),
-                orderBy("libraryIdNo", "desc"),
-                limit(1)
-              );
-              const querySnapshot = await getDocs(libraryIdQuery);
-              let newId = "00001"; // Default ID if no data exists
-              if (!querySnapshot.empty) {
-                const lastDoc = querySnapshot.docs[0];
-                const lastId = parseInt(lastDoc.data().libraryIdNo, 10);
-                newId = (lastId + 1).toString().padStart(5, "0");
-              }
-              libraryIdInput.value = newId;
-            } catch (error) {
-              console.error("Error generating Library ID:", error);
-              alert("Failed to generate Library ID. Please refresh the page.");
-            }
-        
-            // Set Valid Until Date for new entries
-            validUntilInput.value = "July 2025";
-          }
-        });
-        
+        courseSelect.value = userData.course;
         updateMajors(userData.course, userData.department).then(() => {
           majorSelect.value = userData.major;
-        });
-      });
-
-      updateCourses(userData.department).then(() => {
-        document.getElementById("course-select").value = userData.course;
-        updateMajors(userData.course, userData.department).then(() => {
-          document.getElementById("major-select").value = userData.major;
         });
       });
       document.getElementById("grade-select").value = userData.grade;
@@ -670,12 +617,24 @@ if (libraryIdNo && token) {
         document.querySelector(".grade-input").style.display = "none";
         document.querySelector(".strand-input").style.display = "none";
       }
+
+      // Handle faculty, admin, and visitor fields
+      toggleFields(userData.patron);
+      if (userData.patron === 'faculty') {
+        document.querySelector(".college select").value = userData.collegeSelect;
+      } else if (userData.patron === 'admin') {
+        document.querySelector(".campusdept select").value = userData.campusDept;
+      } else if (userData.patron === 'visitor') {
+        document.getElementById("school-select").value = userData.schoolSelect;
+        if (userData.schoolSelect === 'other') {
+          document.getElementById("specify-school-input").value = userData.specifySchool;
+        }
+      }
     }
   }).catch((error) => {
     console.error("Error fetching document:", error);
   });
 }
-
 
 // Autofill Library ID and Valid Until Date
 document.addEventListener("DOMContentLoaded", async () => {
