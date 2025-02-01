@@ -494,6 +494,66 @@ document.getElementById("school-select").addEventListener("change", (event) => {
   }
 });
 
+async function updateSchools() {
+  const schoolSelect = document.getElementById("school-select");
+  schoolSelect.innerHTML = '<option value="" disabled selected>Select School</option>';
+
+  // Example data for schools (replace with your actual data)
+  const schools = [
+    { value: "wmsu", text: "Western Mindanao State University" },
+    { value: "zscmst", text: "Zamboanga State College of Marine Sciences and Technology" },
+    { value: "uz", text: "Universidad de Zamboanga" },
+    { value: "other", text: "Other" },
+  ];
+
+  schools.forEach((school) => {
+    const option = document.createElement("option");
+    option.value = school.value;
+    option.textContent = school.text;
+    schoolSelect.appendChild(option);
+  });
+}
+
+// Function to populate the college dropdown
+async function updateColleges() {
+  const collegeSelect = document.getElementById("college-select");
+  collegeSelect.innerHTML = '<option value="" disabled selected>Select College</option>';
+
+  // Example data for colleges (replace with your actual data)
+  const colleges = [
+    { value: "cics", text: "College of Information in Computing Sciences (CICS)" },
+    { value: "cte", text: "College of Teacher Education (CTE)" },
+    { value: "cet", text: "College of Engineering and Technology (CET)" },
+  ];
+
+  colleges.forEach((college) => {
+    const option = document.createElement("option");
+    option.value = college.value;
+    option.textContent = college.text;
+    collegeSelect.appendChild(option);
+  });
+}
+
+// Function to populate the campus department dropdown
+async function updateCampusDepts() {
+  const campusDeptSelect = document.getElementById("campusdept-select");
+  campusDeptSelect.innerHTML = '<option value="" disabled selected>Select Campus Department</option>';
+
+  // Example data for campus departments (replace with your actual data)
+  const campusDepts = [
+    { value: "Registrar", text: "Registrar" },
+    { value: "Medical and Dental Clinic", text: "Medical and Dental Clinic" },
+    { value: "Cashier", text: "Cashier" },
+  ];
+
+  campusDepts.forEach((dept) => {
+    const option = document.createElement("option");
+    option.value = dept.value;
+    option.textContent = dept.text;
+    campusDeptSelect.appendChild(option);
+  });
+}
+
 
 
 // Generate QR code and return as Base64 data URL
@@ -552,8 +612,13 @@ async function displayUserData(userData) {
   document.getElementById("major-select").value = userData.major;
 
   // Update school, college, and campus department dropdowns
+  await updateSchools();
   document.getElementById("school-select").value = userData.schoolSelect;
+
+  await updateColleges();
   document.getElementById("college-select").value = userData.collegeSelect;
+
+  await updateCampusDepts();
   document.getElementById("campusdept-select").value = userData.campusDept;
 
   // Display each field of the fetched user data
