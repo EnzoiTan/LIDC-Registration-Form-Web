@@ -519,51 +519,75 @@ function toggleFields(patronType) {
   }
 }
 
-    async function displayUserData(userData) {
-      const userDataDiv = document.getElementById("user-data");
+async function displayUserData(userData) {
+  const userDataDiv = document.getElementById("user-data");
 
-      // Update fields dynamically
-      if (userData.department) {
-        await updateCourses(userData.department);
-        document.getElementById("course-select").value = userData.course || "";
-        await updateMajors(userData.course, userData.department);
-        document.getElementById("major-select").value = userData.major || "";
-      }
+  // Fetch and populate select fields dynamically
+  if (userData.department) {
+    await updateCourses(userData.department); // Fetch courses
+    document.getElementById("course-select").value = userData.course || "";
 
-      // Ensure all relevant fields are updated
-      document.querySelector('.department-input').value = userData.department || "";
-      document.querySelector('.course-input').value = userData.course || "";
-      document.querySelector('.major-input').value = userData.major || "";
-      document.querySelector('.grade-input').value = userData.grade || "";
-      document.querySelector('.strand-input').value = userData.strand || "";
-      document.querySelector('.school').value = userData.schoolSelect || "";
-      document.querySelector('.campusdept').value = userData.campusDept || "";
-      document.querySelector('.college').value = userData.collegeSelect || "";
+    await updateMajors(userData.course, userData.department); // Fetch majors
+    document.getElementById("major-select").value = userData.major || "";
+  }
 
-      // Display user data dynamically
-      userDataDiv.innerHTML = `
-        <p>Library ID: ${userData.libraryIdNo}</p>
-        <p>Type of Patron: ${userData.patron}</p>
-        <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
-        ${userData.department ? `<p>Department: ${userData.department}</p>` : ''}
-        ${userData.course ? `<p>Course: ${userData.course}</p>` : ''}
-        ${userData.major ? `<p>Major: ${userData.major}</p>` : ''}
-        ${userData.grade ? `<p>Grade: ${userData.grade}</p>` : ''}
-        ${userData.strand ? `<p>Strand: ${userData.strand}</p>` : ''}
-        <p>School Year: ${userData.schoolYear}</p>
-        <p>Semester: ${userData.semester}</p>
-        <p>Valid Until: ${userData.validUntil}</p>
-        <p>Token: ${userData.token}</p>
-        <p>Times Entered: ${userData.timesEntered}</p>
-        ${userData.collegeSelect ? `<p>College: ${userData.collegeSelect}</p>` : ''}
-        ${userData.schoolSelect ? `<p>School: ${userData.schoolSelect}</p>` : ''}
-        ${userData.specifySchool ? `<p>Specify School: ${userData.specifySchool}</p>` : ''}
-        ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
-      `;
+  if (userData.patron === 'faculty') {
+    await populateSelect('college', 'colleges', userData.collegeSelect);
+  } else if (userData.patron === 'admin') {
+    await populateSelect('campusdept', 'campus_departments', userData.campusDept);
+  } else if (userData.patron === 'visitor') {
+    await populateSelect('school', 'schools', userData.schoolSelect);
+  }
 
-      // Ensure fields are toggled correctly based on patron type
-      toggleFields(userData.patron);
+  // Display user data dynamically
+  userDataDiv.innerHTML = `
+    <p>Library ID: ${userData.libraryIdNo}</p>
+    <p>Type of Patron: ${userData.patron}</p>
+    <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
+    ${userData.department ? `<p>Department: ${userData.department}</p>` : ''}
+    ${userData.course ? `<p>Course: ${userData.course}</p>` : ''}
+    ${userData.major ? `<p>Major: ${userData.major}</p>` : ''}
+    ${userData.grade ? `<p>Grade: ${userData.grade}</p>` : ''}
+    ${userData.strand ? `<p>Strand: ${userData.strand}</p>` : ''}
+    <p>School Year: ${userData.schoolYear}</p>
+    <p>Semester: ${userData.semester}</p>
+    <p>Valid Until: ${userData.validUntil}</p>
+    <p>Token: ${userData.token}</p>
+    <p>Times Entered: ${userData.timesEntered}</p>
+    ${userData.collegeSelect ? `<p>College: ${userData.collegeSelect}</p>` : ''}
+    ${userData.schoolSelect ? `<p>School: ${userData.schoolSelect}</p>` : ''}
+    ${userData.specifySchool ? `<p>Specify School: ${userData.specifySchool}</p>` : ''}
+    ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
+  `;
+
+  // Ensure fields are toggled correctly
+  toggleFields(userData.patron);
+}
+
+async function populateSelect(selectClass, collectionName, selectedValue) {
+  const selectElement = document.querySelector(`.${selectClass}`);
+  if (!selectElement) return;
+
+  // Clear existing options
+  selectElement.innerHTML = '<option value="">Select</option>';
+
+  // Fetch data from Firestore
+  const querySnapshot = await getDocs(collection(db, collectionName));
+  
+  querySnapshot.forEach((doc) => {
+    const option = document.createElement("option");
+    option.value = doc.id;
+    option.textContent = doc.data().name;
+
+    // Set the selected value if it matches
+    if (doc.id === selectedValue) {
+      option.selected = true;
     }
+
+    selectElement.appendChild(option);
+  });
+}
+
 
 // Handle URL parameters
 const urlParams = new URLSearchParams(window.location.search);
