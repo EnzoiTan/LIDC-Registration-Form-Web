@@ -682,8 +682,6 @@ if (libraryIdNo && token) {
   });
 }
 
-console.log(`Toggling fields for patron type: ${patronType}`);
-
 // Autofill Library ID and Valid Until Date
 document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdInput = document.getElementById("library-id");
