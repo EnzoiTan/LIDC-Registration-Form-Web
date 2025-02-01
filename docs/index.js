@@ -246,12 +246,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const majorInput = document.querySelector('.major-input');
     const strandInput = document.querySelector('.strand-input');
     const gradeInput = document.querySelector('.grade-input');
-    const schoolSelect = document.querySelector('.school');
-    const campusDeptInput = document.querySelector('.campusdept');
-    const collegeInput = document.querySelector('.college');
+    const schoolSelect = document.querySelector('.school select');
+    const campusDeptInput = document.querySelector('.campusdept select');
+    const collegeInput = document.querySelector('.college select');
   
     switch (patronType) {
-      case 'student':
+      default: // student
         departmentInput.style.display = 'block';
         courseInput.style.display = 'block';
         majorInput.style.display = 'block';
@@ -288,17 +288,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         strandInput.style.display = 'none';
         gradeInput.style.display = 'none';
         schoolSelect.style.display = 'block';
-        campusDeptInput.style.display = 'none';
-        collegeInput.style.display = 'none';
-        break;
-      default:
-        // Default to student view
-        departmentInput.style.display = 'block';
-        courseInput.style.display = 'block';
-        majorInput.style.display = 'block';
-        strandInput.style.display = 'none';
-        gradeInput.style.display = 'none';
-        schoolSelect.style.display = 'none';
         campusDeptInput.style.display = 'none';
         collegeInput.style.display = 'none';
         break;
