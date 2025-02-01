@@ -539,11 +539,22 @@ async function fetchUserData(libraryId) {
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
 
+  // Check if the userDataDiv exists
+  if (!userDataDiv) {
+    console.error("Element with ID 'user-data' not found in the DOM.");
+    return;
+  }
+
   // Update courses and majors based on department and course
   await updateCourses(userData.department);
   document.getElementById("course-select").value = userData.course;
   await updateMajors(userData.course, userData.department);
   document.getElementById("major-select").value = userData.major;
+
+  // Update school, college, and campus department dropdowns
+  document.getElementById("school-select").value = userData.schoolSelect;
+  document.getElementById("college-select").value = userData.collegeSelect;
+  document.getElementById("campusdept-select").value = userData.campusDept;
 
   // Display each field of the fetched user data
   userDataDiv.innerHTML = `
