@@ -495,7 +495,7 @@ document.getElementById("school-select").addEventListener("change", (event) => {
 });
 
 async function updateSchools() {
-  const schoolSelect = document.getElementById("school-select");
+  const schoolSelect = document.getElementById(".school");
   schoolSelect.innerHTML = '<option value="" disabled selected>Select School</option>';
 
   // Example data for schools (replace with your actual data)
@@ -516,7 +516,7 @@ async function updateSchools() {
 
 // Function to populate the college dropdown
 async function updateColleges() {
-  const collegeSelect = document.getElementById("college-select");
+  const collegeSelect = document.getElementById(".college");
   collegeSelect.innerHTML = '<option value="" disabled selected>Select College</option>';
 
   // Example data for colleges (replace with your actual data)
@@ -536,7 +536,7 @@ async function updateColleges() {
 
 // Function to populate the campus department dropdown
 async function updateCampusDepts() {
-  const campusDeptSelect = document.getElementById("campusdept-select");
+  const campusDeptSelect = document.getElementById(".campusdept");
   campusDeptSelect.innerHTML = '<option value="" disabled selected>Select Campus Department</option>';
 
   // Example data for campus departments (replace with your actual data)
