@@ -486,9 +486,9 @@ function toggleFields(patronType) {
   const majorInput = document.querySelector('.major-input');
   const strandInput = document.querySelector('.strand-input');
   const gradeInput = document.querySelector('.grade-input');
-  const schoolSelect = document.querySelector('.school');
-  const campusDeptInput = document.querySelector('.campusdept');
-  const collegeInput = document.querySelector('.college');
+  const schoolSelect = document.querySelector('.school').value = userData.schoolSelect || "";
+  const campusDeptInput = document.querySelector('.campusdept').value = userData.campusDept || "";
+  const collegeInput = document.querySelector('.college').value = userData.collegeSelect || "";
 
   // Reset all fields to hidden initially
   departmentInput.style.display = 'none';
