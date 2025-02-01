@@ -547,17 +547,59 @@ async function displayUserData(userData) {
     </ul>
   `;
 
-  // Hide or show fields based on department
-  if (userData.department === "shs") {
-    document.querySelector(".course-input").style.display = "none";
-    document.querySelector(".major-input").style.display = "none";
-    document.querySelector(".grade-input").style.display = "block";
-    document.querySelector(".strand-input").style.display = "block";
-  } else {
-    document.querySelector(".course-input").style.display = "block";
-    document.querySelector(".major-input").style.display = "block";
-    document.querySelector(".grade-input").style.display = "none";
-    document.querySelector(".strand-input").style.display = "none";
+  // Hide or show fields based on patron type
+  const departmentInput = document.querySelector('.department-input');
+  const courseInput = document.querySelector('.course-input');
+  const majorInput = document.querySelector('.major-input');
+  const strandInput = document.querySelector('.strand-input');
+  const gradeInput = document.querySelector('.grade-input');
+  const schoolSelect = document.querySelector('.school');
+  const campusDeptInput = document.querySelector('.campusdept');
+  const collegeInput = document.querySelector('.college');
+
+  const patronType = userData.patron.toLowerCase();
+
+  switch (patronType) {
+    case 'visitor':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'block';
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'none';
+      break;
+    case 'faculty':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'block';
+      break;
+    case 'admin':
+      departmentInput.style.display = 'none';
+      courseInput.style.display = 'none';
+      majorInput.style.display = 'none';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'block';
+      collegeInput.style.display = 'none';
+      break;
+    default: // student
+      departmentInput.style.display = 'block';
+      courseInput.style.display = 'block';
+      majorInput.style.display = 'block';
+      strandInput.style.display = 'none';
+      gradeInput.style.display = 'none';
+      schoolSelect.style.display = 'none';
+      campusDeptInput.style.display = 'none';
+      collegeInput.style.display = 'none';
+      break;
   }
 }
 
