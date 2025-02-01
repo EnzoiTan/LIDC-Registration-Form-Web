@@ -294,7 +294,7 @@ document.querySelector('.patron select').addEventListener('change', (event) => {
 document.addEventListener("DOMContentLoaded", () => {
   const patronSelect = document.querySelector('.patron select');
   if (patronSelect) {
-    toggleFields(patronSelect.value); // Initialize fields based on default patron type
+    toggleFields(patronSelect.value);
   }
 });
 
