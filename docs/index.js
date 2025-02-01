@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
 
   // Function to toggle visibility based on patron type
-  const toggleFields = (patronType) => {
+  function toggleFields(patronType) {
     const departmentInput = document.querySelector('.department-input');
     const courseInput = document.querySelector('.course-input');
     const majorInput = document.querySelector('.major-input');
@@ -250,11 +250,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const campusDeptInput = document.querySelector('.campusdept');
     const collegeInput = document.querySelector('.college');
   
-    // Hide all inputs initially
-    [departmentInput, courseInput, majorInput, strandInput, gradeInput, schoolSelect, campusDeptInput, collegeInput].forEach(input => {
-      input.style.display = 'none';
-    });
+    // Reset all fields to hidden initially
+    departmentInput.style.display = 'none';
+    courseInput.style.display = 'none';
+    majorInput.style.display = 'none';
+    strandInput.style.display = 'none';
+    gradeInput.style.display = 'none';
+    schoolSelect.style.display = 'none';
+    campusDeptInput.style.display = 'none';
+    collegeInput.style.display = 'none';
   
+    // Show relevant fields based on patron type
     switch (patronType) {
       case 'faculty':
         collegeInput.style.display = 'block';
@@ -264,9 +270,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         break;
       case 'visitor':
         schoolSelect.style.display = 'block';
-        if (document.getElementById("school-select").value === 'other') {
-          document.getElementById("specify-school-input").style.display = 'block';
-        }
         break;
       default:
         departmentInput.style.display = 'block';
@@ -274,7 +277,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         majorInput.style.display = 'block';
         break;
     }
-  };
+  }
 
 // Event listener for when patron type is changed
 document.querySelector('.patron select').addEventListener('change', (event) => {
@@ -284,9 +287,9 @@ document.querySelector('.patron select').addEventListener('change', (event) => {
 // Initialize fields based on default patron type
 document.addEventListener("DOMContentLoaded", () => {
   const patronSelect = document.querySelector('.patron select');
-    patronSelect.addEventListener('change', (event) => {
-      toggleFields(event.target.value);
-    });
+  if (patronSelect) {
+    toggleFields(patronSelect.value); // Initialize fields based on default patron type
+  }
 
   // console.log(`Toggling fields for patron type: ${patronType}`);
 });
@@ -519,6 +522,15 @@ async function fetchUserData(libraryId) {
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
 
+  // Update courses and majors based on department and course
+  if (userData.department) {
+    await updateCourses(userData.department);
+    document.getElementById("course-select").value = userData.course || "";
+    await updateMajors(userData.course, userData.department);
+    document.getElementById("major-select").value = userData.major || "";
+  }
+
+  // Display user data dynamically
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
     <p>Type of Patron: ${userData.patron}</p>
@@ -526,12 +538,23 @@ async function displayUserData(userData) {
     ${userData.department ? `<p>Department: ${userData.department}</p>` : ''}
     ${userData.course ? `<p>Course: ${userData.course}</p>` : ''}
     ${userData.major ? `<p>Major: ${userData.major}</p>` : ''}
+    ${userData.grade ? `<p>Grade: ${userData.grade}</p>` : ''}
+    ${userData.strand ? `<p>Strand: ${userData.strand}</p>` : ''}
+    <p>School Year: ${userData.schoolYear}</p>
+    <p>Semester: ${userData.semester}</p>
+    <p>Valid Until: ${userData.validUntil}</p>
+    <p>Token: ${userData.token}</p>
+    <p>Times Entered: ${userData.timesEntered}</p>
     ${userData.collegeSelect ? `<p>College: ${userData.collegeSelect}</p>` : ''}
     ${userData.schoolSelect ? `<p>School: ${userData.schoolSelect}</p>` : ''}
     ${userData.specifySchool ? `<p>Specify School: ${userData.specifySchool}</p>` : ''}
     ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
   `;
+
+  // Ensure fields are toggled correctly
+  toggleFields(userData.patron);
 }
+
 
 // Handle URL parameters
 const urlParams = new URLSearchParams(window.location.search);
