@@ -416,6 +416,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     schoolSelect,
     specifySchool: schoolSelect === "other" ? specifySchoolInput : "",
     campusDept,
+    entryTimestamps: [new Date()], // Initialize with the first timestamp
   };
 
   try {
@@ -425,26 +426,40 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     if (userSnap.exists()) {
       // Increment timesEntered for existing users
       const existingTimesEntered = userSnap.data().timesEntered || 0;
-      await setDoc(userRef, { timesEntered: existingTimesEntered + 1 }, { merge: true });
-      alert("Welcome back! Your entry has been recorded.");
+      const existingEntryTimestamps = userSnap.data().entryTimestamps || [];
+
+      // Update the document with incremented timesEntered and new timestamp
+      await setDoc(
+        userRef,
+        {
+          timesEntered: existingTimesEntered + 1,
+          entryTimestamps: [...existingEntryTimestamps, new Date()], // Append new timestamp
+        },
+        { merge: true }
+      );
+      showModal("Welcome back! Your entry has been recorded.");
     } else {
       // Create new user with all data
       await setDoc(userRef, userData);
       // Generate and save QR code for new users
       const fullQRCodeLink = `https://enzoitan.github.io/LIDC-Registration-Form-Web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
       const qrCodeData = await generateQRCodeData(fullQRCodeLink);
-      await setDoc(userRef, {
-        qrCodeURL: fullQRCodeLink,
-        qrCodeImage: qrCodeData
-      }, { merge: true });
+      await setDoc(
+        userRef,
+        {
+          qrCodeURL: fullQRCodeLink,
+          qrCodeImage: qrCodeData,
+        },
+        { merge: true }
+      );
       downloadQRCode(qrCodeData, `${libraryIdNo}.png`);
-      alert("Data successfully submitted!");
+      showModal("Data successfully submitted!");
     }
 
     window.location.reload();
   } catch (error) {
     console.error("Error storing data:", error);
-    alert("An error occurred while storing the data. Please try again.");
+    showModal("An error occurred while storing the data. Please try again.");
   }
 });
 
