@@ -594,9 +594,9 @@ async function displayUserData(userData) {
   collegeInput.style.display = 'none';
 
   // Bind fetched data to input/select fields
-  document.getElementById('.school').value = userData.schoolSelect || '';
-  document.getElementById('.campusdept').value = userData.campusDept || '';
-  document.getElementById('.college').value = userData.collegeSelect || '';
+  document.getElementById('.school select').value = userData.schoolSelect || '';
+  document.getElementById('.campusdept select').value = userData.campusDept || '';
+  document.getElementById('.college select').value = userData.collegeSelect || '';
 
   // Show fields based on patron type
   switch (patronType) {
