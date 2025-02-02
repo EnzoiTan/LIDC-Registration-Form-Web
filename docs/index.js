@@ -13,6 +13,89 @@ const firebaseConfig = {
   measurementId: "G-S3X4YSV65S"
 };
 
+/* Add this CSS for the modal and loading spinner */
+const style = document.createElement('style');
+style.innerHTML = `
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  #modal-close {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  #modal-close:hover {
+    background: #2980b9;
+  }
+
+  /* Loading Spinner Styles */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    justify-content: center;
+    align-items: center;
+    z-index: 1001; /* Above everything else */
+  }
+  .loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(style);
+
+// Create the modal
+const modal = document.createElement('div');
+modal.className = 'modal';
+modal.innerHTML = `
+  <div class="modal-content">
+    <p id="modal-message"></p>
+    <button id="modal-close">OK</button>
+  </div>
+`;
+document.body.appendChild(modal);
+
+// Create the loading overlay
+const loadingOverlay = document.createElement('div');
+loadingOverlay.className = 'loading-overlay';
+loadingOverlay.innerHTML = '<div class="loading-spinner"></div>';
+document.body.appendChild(loadingOverlay);
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -330,85 +413,103 @@ function generateRandomToken() {
   return token;
 }
 
+function showModal(message) {
+  const modalMessage = document.getElementById('modal-message');
+  modalMessage.textContent = message;
+  modal.style.display = 'flex'; // Show the modal
+}
 
-// Submit Form
+// Close modal when the OK button is clicked
+document.getElementById('modal-close').addEventListener('click', () => {
+  modal.style.display = 'none'; // Hide the modal
+});
+
+// Function to show/hide loading spinner
+function toggleLoading(show) {
+  loadingOverlay.style.display = show ? 'flex' : 'none'; // Show/hide the loading overlay
+}
+
+// Updated submit event listener with loading indicator and modal
 document.querySelector(".submit").addEventListener("click", async (event) => {
   event.preventDefault();
 
-  // Collecting general data
-  const libraryIdInput = document.getElementById("library-id");
-  const validUntilInput = document.getElementById("valid-until");
-  const patron = document.querySelector(".patron select").value.trim();
-  const lastName = document.querySelector(".name-inputs .data-input:nth-child(1) input").value.trim();
-  const firstName = document.querySelector(".name-inputs .data-input:nth-child(2) input").value.trim();
-  const middleInitial = document.querySelector(".name-inputs .data-input:nth-child(3) input").value.trim();
-  const gender = document.querySelector(".gender select").value.trim();
-  const department = departmentSelect.value.trim();
-  const course = courseSelect.value.trim();
-  const major = majorSelect.value.trim();
-  const grade = gradeSelect.value.trim();
-  const strand = strandSelect.value.trim();
-  const schoolYear = document.querySelector(".year-sem-inputs .data-input:nth-child(1) select").value.trim();
-  const semester = document.querySelector(".year-sem-inputs .data-input:nth-child(2) select").value.trim();
-
-  const libraryIdNo = libraryIdInput.value.trim();
-  const validUntil = validUntilInput.value.trim();
-
-  // Collecting additional admin-related data
-  const collegeSelect = document.querySelector(".data-input.college select").value.trim(); // Department/College
-  const schoolSelect = document.getElementById("school-select").value.trim(); // School
-  const specifySchoolInput = document.getElementById("specify-school-input").value.trim(); // If "Other" is selected
-  const campusDept = document.querySelector(".data-input.campusdept select").value.trim(); // Campus Department
-
-  // Prepare the data object to store in Firestore
-  const userData = {
-    libraryIdNo,
-    validUntil,
-    patron,
-    lastName,
-    firstName,
-    middleInitial,
-    gender,
-    department,
-    course: department === "shs" ? "" : course, // Only save course if not SHS
-    major: department === "shs" ? "" : major, // Only save major if not SHS
-    grade: department === "shs" ? grade : "", // Only save grade if SHS
-    strand: department === "shs" ? strand : "", // Only save strand if SHS
-    schoolYear,
-    semester,
-    timesEntered: 1, // Default for new users
-    token: generateRandomToken(),
-    timestamp: new Date(),
-    collegeSelect,
-    schoolSelect,
-    specifySchool: schoolSelect === "other" ? specifySchoolInput : "",
-    campusDept,
-    entryTimestamps: [new Date()], // Initialize with the first timestamp
-  };
+  // Disable the submit button to prevent duplicate submissions
+  const submitButton = document.querySelector(".submit");
+  submitButton.disabled = true;
+  toggleLoading(true); // Show loading spinner
 
   try {
+    // Collect form data (same as before)
+    const libraryIdInput = document.getElementById("library-id");
+    const validUntilInput = document.getElementById("valid-until");
+    const patron = document.querySelector(".patron select").value.trim();
+    const lastName = document.querySelector(".name-inputs .data-input:nth-child(1) input").value.trim();
+    const firstName = document.querySelector(".name-inputs .data-input:nth-child(2) input").value.trim();
+    const middleInitial = document.querySelector(".name-inputs .data-input:nth-child(3) input").value.trim();
+    const gender = document.querySelector(".gender select").value.trim();
+    const department = departmentSelect.value.trim();
+    const course = courseSelect.value.trim();
+    const major = majorSelect.value.trim();
+    const grade = gradeSelect.value.trim();
+    const strand = strandSelect.value.trim();
+    const schoolYear = document.querySelector(".year-sem-inputs .data-input:nth-child(1) select").value.trim();
+    const semester = document.querySelector(".year-sem-inputs .data-input:nth-child(2) select").value.trim();
+
+    const libraryIdNo = libraryIdInput.value.trim();
+    const validUntil = validUntilInput.value.trim();
+
+    // Collect additional admin-related data
+    const collegeSelect = document.querySelector(".data-input.college select").value.trim();
+    const schoolSelect = document.getElementById("school-select").value.trim();
+    const specifySchoolInput = document.getElementById("specify-school-input").value.trim();
+    const campusDept = document.querySelector(".data-input.campusdept select").value.trim();
+
+    // Prepare the data object
+    const userData = {
+      libraryIdNo,
+      validUntil,
+      patron,
+      lastName,
+      firstName,
+      middleInitial,
+      gender,
+      department,
+      course: department === "shs" ? "" : course,
+      major: department === "shs" ? "" : major,
+      grade: department === "shs" ? grade : "",
+      strand: department === "shs" ? strand : "",
+      schoolYear,
+      semester,
+      timesEntered: 1,
+      token: generateRandomToken(),
+      timestamp: new Date(),
+      collegeSelect,
+      schoolSelect,
+      specifySchool: schoolSelect === "other" ? specifySchoolInput : "",
+      campusDept,
+      entryTimestamps: [new Date()],
+    };
+
     const userRef = doc(db, "LIDC_Users", libraryIdNo);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
-      // Increment timesEntered for existing users
+      // Update existing user
       const existingTimesEntered = userSnap.data().timesEntered || 0;
       const existingEntryTimestamps = userSnap.data().entryTimestamps || [];
 
-      // Update the document with incremented timesEntered and new timestamp
       await setDoc(
         userRef,
         {
           timesEntered: existingTimesEntered + 1,
-          entryTimestamps: [...existingEntryTimestamps, new Date()], // Append new timestamp
+          entryTimestamps: [...existingEntryTimestamps, new Date()],
         },
         { merge: true }
       );
-      alert("Welcome back! Your entry has been recorded.");
+      showModal("Welcome back! Your entry has been recorded.");
     } else {
-      // Create new user with all data
+      // Create new user
       await setDoc(userRef, userData);
-      // Generate and save QR code for new users
       const fullQRCodeLink = `https://enzoitan.github.io/LIDC-Registration-Form-Web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
       const qrCodeData = await generateQRCodeData(fullQRCodeLink);
       await setDoc(
@@ -420,13 +521,14 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
         { merge: true }
       );
       downloadQRCode(qrCodeData, `${libraryIdNo}.png`);
-      alert("Data successfully submitted!");
+      showModal("Data successfully submitted!");
     }
-
-    window.location.reload();
   } catch (error) {
     console.error("Error storing data:", error);
-    alert("An error occurred while storing the data. Please try again.");
+    showModal("An error occurred while storing the data. Please try again.");
+  } finally {
+    toggleLoading(false); // Hide loading spinner
+    submitButton.disabled = false; // Re-enable the submit button
   }
 });
 
@@ -462,20 +564,24 @@ function downloadQRCode(dataURL, filename) {
   link.click();
 }
 
+// Updated fetchUserData function with loading indicator
 async function fetchUserData(libraryId) {
+  toggleLoading(true); // Show loading spinner
   try {
     const userRef = doc(db, "LIDC_Users", libraryId);
     const docSnap = await getDoc(userRef);
 
     if (docSnap.exists()) {
       const userData = docSnap.data();
-      console.log("Fetched User Data:", userData); // Debugging
       displayUserData(userData);
     } else {
-      console.error("No such document!");
+      showModal("No data found for the given Library ID.");
     }
   } catch (error) {
     console.error("Error fetching user data:", error);
+    showModal("An error occurred while fetching user data.");
+  } finally {
+    toggleLoading(false); // Hide loading spinner
   }
 }
 

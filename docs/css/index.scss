@@ -10,6 +10,11 @@
 //   display: block !important;
 // }
 
+.logos{
+    display: flex;
+    gap: 8px;
+}
+
 body{
     background-color: #f1f1f1;
     font-family: Arial, sans-serif;
