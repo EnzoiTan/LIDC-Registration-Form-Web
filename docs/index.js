@@ -34,13 +34,14 @@ style.innerHTML = `
     padding: 20px;
     border-radius: 8px;
     text-align: center;
-    max-width: 400px;
-    width: 100%;
+    font-size: 1.1em;
+    max-width: 500px;
+    width: 300px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
   #modal-close {
     margin-top: 20px;
-    padding: 10px 20px;
+    padding: 6px 20px;
     background: #3498db;
     color: white;
     border: none;
@@ -59,14 +60,14 @@ style.innerHTML = `
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    background: rgba(10, 10, 10, 0.8); /* Semi-transparent white background */
     justify-content: center;
     align-items: center;
     z-index: 1001; /* Above everything else */
   }
   .loading-spinner {
     border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
+    border-top: 4px solid #8b2c2c;
     border-radius: 50%;
     width: 40px;
     height: 40px;

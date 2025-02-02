@@ -10,6 +10,113 @@
 //   display: block !important;
 // }
 
+
+/* Overlay Background */
+.confirmation-dialog,
+.instructions-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Dialog Content */
+.confirmation-content,
+.instructions-content {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-in-out;
+}
+
+/* Header Styling */
+.instructions-content h3 {
+  margin-bottom: 10px;
+  font-size: 20px;
+  color: #333;
+}
+
+/* Buttons Container */
+.confirmation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+/* Buttons */
+button {
+  padding: 12px 22px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Confirm Button */
+button.confirm {
+  background: #007bff;
+  color: white;
+}
+
+button.confirm:hover {
+  background: #0056b3;
+}
+
+/* Cancel Button */
+button.cancel {
+  background: #dc3545;
+  color: white;
+}
+
+button.cancel:hover {
+  background: #b52b3b;
+}
+
+/* Close Button */
+.instructions-content button {
+  background: #007bff;
+  color: white;
+  width: 100%;
+}
+
+.instructions-content button:hover {
+  background: #0056b3;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .logos{
     display: flex;
     gap: 8px;
