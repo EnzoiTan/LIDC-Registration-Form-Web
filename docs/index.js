@@ -1,19 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+/* Remove Firebase imports – we no longer use Firebase */
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCKlyckfCUI_Ooc8XiSziJ-iaKR1cbw85I",
-  authDomain: "lcc-lidc.firebaseapp.com",
-  databaseURL: "https://lcc-lidc-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "lcc-lidc",
-  storageBucket: "lcc-lidc.firebasestorage.app",
-  messagingSenderId: "934783227135",
-  appId: "1:934783227135:web:4b85df00c1186c8d5fe8ca",
-  measurementId: "G-S3X4YSV65S"
-};
-
-/* Add this CSS for the modal and loading spinner */
+// CSS for modal and loading spinner
 const style = document.createElement('style');
 style.innerHTML = `
   /* Modal Styles */
@@ -60,10 +47,10 @@ style.innerHTML = `
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(10, 10, 10, 0.8); /* Semi-transparent white background */
+    background: rgba(10, 10, 10, 0.8);
     justify-content: center;
     align-items: center;
-    z-index: 1001; /* Above everything else */
+    z-index: 1001;
   }
   .loading-spinner {
     border: 4px solid #f3f3f3;
@@ -97,10 +84,7 @@ loadingOverlay.className = 'loading-overlay';
 loadingOverlay.innerHTML = '<div class="loading-spinner"></div>';
 document.body.appendChild(loadingOverlay);
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
+// The departmentCourses object remains unchanged
 const departmentCourses = {
   cics: {
     courses: {
@@ -299,21 +283,14 @@ function updateMajors(course, department) {
   });
 }
 
-// Autofill Library ID and Valid Until Date
+// Replace Firebase data fetching with AJAX calls to PHP endpoints
 document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdInput = document.getElementById("library-id");
   const validUntilInput = document.getElementById("valid-until");
   const patronSelect = document.querySelector('.patron select');
-  const departmentInput = document.querySelector('.department-input');
-  const courseInput = document.querySelector('.course-input');
-  const majorInput = document.querySelector('.major-input');
-  const strandInput = document.querySelector('.strand-input');
-  const gradeInput = document.querySelector('.grade-input');
   const schoolSelect = document.querySelector('.school');
   const schoolSelected = document.querySelector('.school select');
   const specifySchoolInput = document.getElementById("specify-school-input");
-  const campusDeptInput = document.querySelector('.campusdept');
-  const collegeInput = document.querySelector('.college');
 
   if (!libraryIdInput || !validUntilInput || !patronSelect) {
     console.error("One or more required DOM elements are missing.");
@@ -323,88 +300,50 @@ document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
 
-// Event listener for when patron type is changed
-document.querySelector('.patron select').addEventListener('change', (event) => {
-  toggleFields(event.target.value);
-});
-
-// Initialize fields based on default patron type
-document.addEventListener("DOMContentLoaded", () => {
-  const patronSelect = document.querySelector('.patron select');
-  if (patronSelect) {
-    toggleFields(patronSelect.value); // Initialize fields based on default patron type
-  }
-
-  // console.log(`Toggling fields for patron type: ${patronType}`);
-});
-
-  const toggleSpecifySchoolInput = () => {
-    if (schoolSelected && schoolSelected.value === 'other') {
-      specifySchoolInput.style.display = 'block'; // Show the input field
-    } else {
-      specifySchoolInput.style.display = 'none'; // Hide the input field
-    }
-  };
-
   // Event listener for when patron type is changed
-  patronSelect.addEventListener('change', (event) => {
+  document.querySelector('.patron select').addEventListener('change', (event) => {
     toggleFields(event.target.value);
   });
 
-  // Event listener for when school selection is changed
-  schoolSelect.addEventListener('change', toggleSpecifySchoolInput);
+  // Initialize fields based on default patron type
+  if (patronSelect) {
+    toggleFields(patronSelect.value);
+  }
 
-  // Initialize fields based on default patron type and school selection
-  toggleFields(patronSelect.value);
-  toggleSpecifySchoolInput(); // Ensure the input field is shown/hidden based on the current selection
+  const toggleSpecifySchoolInput = () => {
+    if (schoolSelected && schoolSelected.value === 'other') {
+      specifySchoolInput.style.display = 'block';
+    } else {
+      specifySchoolInput.style.display = 'none';
+    }
+  };
+
+  schoolSelect.addEventListener('change', toggleSpecifySchoolInput);
+  toggleSpecifySchoolInput();
 
   if (libraryIdNo) {
-    // Fetch data for the specific Library ID
+    // Fetch user data from XAMPP (PHP/MySQL)
     try {
-      const userRef = doc(db, "LIDC_Users", libraryIdNo);
-      const docSnap = await getDoc(userRef);
-
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        // Fill input fields with existing user data
-        libraryIdInput.value = userData.libraryIdNo;
-        validUntilInput.value = userData.validUntil || "July 2025"; // Default if missing
-        displayUserData(userData); // Load other user details
-        toggleFields(userData.patronType); // Apply visibility logic based on patron type
-      } else {
-        console.error("No data found for the given Library ID.");
+      const response = await fetch(`http://192.168.0.20:8080/fetch_user.php?libraryIdNo=${libraryIdNo}`);
+      const userData = await response.json();
+      if (userData.error) {
+        console.error("Error: " + userData.error);
         alert("User not found.");
+      } else {
+        libraryIdInput.value = userData.libraryIdNo;
+        validUntilInput.value = userData.validUntil || "July 2025";
+        displayUserData(userData);
+        toggleFields(userData.patronType);
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   } else {
-    // Generate a new Library ID
-    try {
-      const libraryIdQuery = query(
-        collection(db, "LIDC_Users"),
-        orderBy("libraryIdNo", "desc"),
-        limit(1)
-      );
-      const querySnapshot = await getDocs(libraryIdQuery);
-      let newId = "00001"; // Default ID if no data exists
-      if (!querySnapshot.empty) {
-        const lastDoc = querySnapshot.docs[0];
-        const lastId = parseInt(lastDoc.data().libraryIdNo, 10);
-        newId = (lastId + 1).toString().padStart(5, "0");
-      }
-      libraryIdInput.value = newId;
-    } catch (error) {
-      console.error("Error generating Library ID:", error);
-      alert("Failed to generate Library ID. Please refresh the page.");
-    }
-
-    // Set Valid Until Date for new entries
     validUntilInput.value = "July 2025";
   }
 });
 
-// Generate Random Token
+// Generate Random Token remains the same
 function generateRandomToken() {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let token = "";
@@ -417,30 +356,27 @@ function generateRandomToken() {
 function showModal(message) {
   const modalMessage = document.getElementById('modal-message');
   modalMessage.textContent = message;
-  modal.style.display = 'flex'; // Show the modal
+  modal.style.display = 'flex';
 }
 
-// Close modal when the OK button is clicked
 document.getElementById('modal-close').addEventListener('click', () => {
-  modal.style.display = 'none'; // Hide the modal
+  modal.style.display = 'none';
 });
 
-// Function to show/hide loading spinner
 function toggleLoading(show) {
-  loadingOverlay.style.display = show ? 'flex' : 'none'; // Show/hide the loading overlay
+  loadingOverlay.style.display = show ? 'flex' : 'none';
 }
 
-// Updated submit event listener with loading indicator and modal
+// Submit event listener now calls the PHP endpoint to save data
 document.querySelector(".submit").addEventListener("click", async (event) => {
   event.preventDefault();
 
-  // Disable the submit button to prevent duplicate submissions
   const submitButton = document.querySelector(".submit");
   submitButton.disabled = true;
-  toggleLoading(true); // Show loading spinner
+  toggleLoading(true);
 
   try {
-    // Collect form data (same as before)
+    // Collect form data
     const libraryIdInput = document.getElementById("library-id");
     const validUntilInput = document.getElementById("valid-until");
     const patron = document.querySelector(".patron select").value.trim();
@@ -459,7 +395,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     const libraryIdNo = libraryIdInput.value.trim();
     const validUntil = validUntilInput.value.trim();
 
-    // Collect additional admin-related data
+    // Additional admin-related data
     const collegeSelect = document.querySelector(".data-input.college select").value.trim();
     const schoolSelect = document.getElementById("school-select").value.trim();
     const specifySchoolInput = document.getElementById("specify-school-input").value.trim();
@@ -491,59 +427,44 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
       entryTimestamps: [new Date()],
     };
 
-    const userRef = doc(db, "LIDC_Users", libraryIdNo);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-      // Update existing user
-      const existingTimesEntered = userSnap.data().timesEntered || 0;
-      const existingEntryTimestamps = userSnap.data().entryTimestamps || [];
-
-      await setDoc(
-        userRef,
-        {
-          timesEntered: existingTimesEntered + 1,
-          entryTimestamps: [...existingEntryTimestamps, new Date()],
-        },
-        { merge: true }
-      );
-      showModal("Welcome back! Your entry has been recorded.");
+    // Send the data to the PHP endpoint
+    const response = await fetch("http://localhost:3000/docs/save_user.php", {
+      method: "POST", // Make sure method is POST
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(userData) // Convert data to JSON
+    });
+    const result = await response.json();
+    if (result.error) {
+      showModal(result.error);
     } else {
-      // Create new user
-      await setDoc(userRef, userData);
-      const fullQRCodeLink = `https://enzoitan.github.io/LIDC-Registration-Form-Web/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
-      const qrCodeData = await generateQRCodeData(fullQRCodeLink);
-      await setDoc(
-        userRef,
-        {
-          qrCodeURL: fullQRCodeLink,
-          qrCodeImage: qrCodeData,
-        },
-        { merge: true }
-      );
-      downloadQRCode(qrCodeData, `${libraryIdNo}.png`);
-      showModal("Data successfully submitted!");
+      showModal(result.message);
+      if (result.qrCodeURL) {
+        // Optionally handle QR Code URL (download or display)
+        console.log("QR Code URL:", result.qrCodeURL);
+      }
     }
   } catch (error) {
     console.error("Error storing data:", error);
     showModal("An error occurred while storing the data. Please try again.");
   } finally {
-    toggleLoading(false); // Hide loading spinner
-    submitButton.disabled = false; // Re-enable the submit button
+    toggleLoading(false);
+    submitButton.disabled = false;
   }
 });
 
-// Show or hide the "Specify School" input field when "Other" is selected
+// Show/hide "Specify School" input field when "Other" is selected
 document.getElementById("school-select").addEventListener("change", (event) => {
   const specifySchoolInput = document.getElementById("specify-school-input");
   if (event.target.value === "other") {
-    specifySchoolInput.style.display = "block"; // Show the input field
+    specifySchoolInput.style.display = "block";
   } else {
-    specifySchoolInput.style.display = "none"; // Hide the input field
+    specifySchoolInput.style.display = "none";
   }
 });
 
-// Generate QR code and return as Base64 data URL
+// Generate QR Code and return as Base64 data URL remains unchanged
 async function generateQRCodeData(data) {
   try {
     const qrDataURL = await QRCode.toDataURL(JSON.stringify(data), {
@@ -557,7 +478,7 @@ async function generateQRCodeData(data) {
   }
 }
 
-// Auto-download the QR code
+// Auto-download the QR Code
 function downloadQRCode(dataURL, filename) {
   const link = document.createElement("a");
   link.href = dataURL;
@@ -565,28 +486,26 @@ function downloadQRCode(dataURL, filename) {
   link.click();
 }
 
-// Updated fetchUserData function with loading indicator
+// Fetch user data function using PHP endpoint
 async function fetchUserData(libraryId) {
-  toggleLoading(true); // Show loading spinner
+  toggleLoading(true);
   try {
-    const userRef = doc(db, "LIDC_Users", libraryId);
-    const docSnap = await getDoc(userRef);
-
-    if (docSnap.exists()) {
-      const userData = docSnap.data();
-      displayUserData(userData);
+    const response = await fetch(`http://192.168.0.20:8080/fetch_user.php?libraryIdNo=${libraryId}`);
+    const data = await response.json();
+    if (data.error) {
+      showModal(data.error);
     } else {
-      showModal("No data found for the given Library ID.");
+      displayUserData(data);
     }
   } catch (error) {
     console.error("Error fetching user data:", error);
     showModal("An error occurred while fetching user data.");
   } finally {
-    toggleLoading(false); // Hide loading spinner
+    toggleLoading(false);
   }
 }
 
-// Function to toggle visibility based on patron type
+// Toggle field visibility based on patron type (unchanged)
 function toggleFields(patronType) {
   const departmentInput = document.querySelector('.department-input');
   const courseInput = document.querySelector('.course-input');
@@ -597,7 +516,7 @@ function toggleFields(patronType) {
   const campusDeptInput = document.querySelector('.campusdept');
   const collegeInput = document.querySelector('.college');
 
-  // Reset all fields to hidden initially
+  // Hide all fields initially
   departmentInput.style.display = 'none';
   courseInput.style.display = 'none';
   majorInput.style.display = 'none';
@@ -607,7 +526,7 @@ function toggleFields(patronType) {
   campusDeptInput.style.display = 'none';
   collegeInput.style.display = 'none';
 
-  // Show relevant fields based on patron type
+  // Show fields based on patron type
   switch (patronType) {
     case 'faculty':
       collegeInput.style.display = 'block';
@@ -629,33 +548,29 @@ function toggleFields(patronType) {
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
 
-  // Fetch and populate select fields dynamically
+  // Populate dynamic select fields if user data exists
   if (userData.department) {
-    await updateCourses(userData.department); // Fetch courses
+    await updateCourses(userData.department);
     document.getElementById("course-select").value = userData.course || "";
-
-    await updateMajors(userData.course, userData.department); // Fetch majors
+    await updateMajors(userData.course, userData.department);
     document.getElementById("major-select").value = userData.major || "";
   }
 
   if (userData.patron === 'faculty') {
-    // Populate college-select for faculty
     document.getElementById("college-select").value = userData.collegeSelect || "";
   } else if (userData.patron === 'admin') {
-    // Populate campusdept-select for admin
     document.getElementById("campusdept-select").value = userData.campusDept || "";
   } else if (userData.patron === 'visitor') {
-    // Populate school-select and specify-school-input for visitor
     document.getElementById("school-select").value = userData.schoolSelect || "";
     if (userData.schoolSelect === 'other') {
       document.getElementById("specify-school-input").value = userData.specifySchool || "";
-      document.getElementById("specify-school-input").style.display = "block"; // Show the input field
+      document.getElementById("specify-school-input").style.display = "block";
     } else {
-      document.getElementById("specify-school-input").style.display = "none"; // Hide the input field
+      document.getElementById("specify-school-input").style.display = "none";
     }
   }
 
-  // Display user data dynamically
+  // Dynamically display the user data
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
     <p>Type of Patron: ${userData.patron}</p>
@@ -676,119 +591,25 @@ async function displayUserData(userData) {
     ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
   `;
 
-  // Ensure fields are toggled correctly
+  // Adjust field visibility
   toggleFields(userData.patron);
 }
 
-// Handle URL parameters
+// Handle URL parameters for fetching user data
 const urlParams = new URLSearchParams(window.location.search);
-const libraryIdNo = urlParams.get('libraryIdNo');
-const token = urlParams.get('token');
+const libraryIdNoParam = urlParams.get('libraryIdNo');
+const tokenParam = urlParams.get('token');
 
-if (libraryIdNo && token) {
-  fetchUserData(libraryIdNo).then((userData) => {
-    if (userData && userData.token === token) {
-      document.querySelector(".patron select").value = userData.patron;
-      document.querySelector(".name-inputs .data-input:nth-child(1) input").value = userData.lastName;
-      document.querySelector(".name-inputs .data-input:nth-child(2) input").value = userData.firstName;
-      document.querySelector(".name-inputs .data-input:nth-child(3) input").value = userData.middleInitial;
-      document.querySelector(".gender select").value = userData.gender;
-      document.getElementById("library-id").value = userData.libraryIdNo;
-      document.getElementById("department-select").value = userData.department;
-      updateCourses(userData.department).then(() => {
-        courseSelect.value = userData.course;// Autofill Library ID and Valid Until Date
-        document.addEventListener("DOMContentLoaded", async () => {
-          const libraryIdInput = document.getElementById("library-id");
-          const validUntilInput = document.getElementById("valid-until");
-        
-          if (!libraryIdInput || !validUntilInput) {
-            console.error("One or more required DOM elements are missing.");
-            return;
-          }
-        
-          const urlParams = new URLSearchParams(window.location.search);
-          const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
-        
-          if (libraryIdNo) {
-            // Fetch data for the specific Library ID
-            try {
-              const userRef = doc(db, "LIDC_Users", libraryIdNo);
-              const docSnap = await getDoc(userRef);
-        
-              if (docSnap.exists()) {
-                const userData = docSnap.data();
-                // Fill input fields with existing user data
-                libraryIdInput.value = userData.libraryIdNo;
-                validUntilInput.value = userData.validUntil || "July 2025"; // Default if missing
-                displayUserData(userData); // Load other user details
-              } else {
-                console.error("No data found for the given Library ID.");
-                alert("User not found.");
-              }
-            } catch (error) {
-              console.error("Error fetching user data:", error);
-            }
-          } else {
-            // Generate a new Library ID
-            try {
-              const libraryIdQuery = query(
-                collection(db, "LIDC_Users"),
-                orderBy("libraryIdNo", "desc"),
-                limit(1)
-              );
-              const querySnapshot = await getDocs(libraryIdQuery);
-              let newId = "00001"; // Default ID if no data exists
-              if (!querySnapshot.empty) {
-                const lastDoc = querySnapshot.docs[0];
-                const lastId = parseInt(lastDoc.data().libraryIdNo, 10);
-                newId = (lastId + 1).toString().padStart(5, "0");
-              }
-              libraryIdInput.value = newId;
-            } catch (error) {
-              console.error("Error generating Library ID:", error);
-              alert("Failed to generate Library ID. Please refresh the page.");
-            }
-        
-            // Set Valid Until Date for new entries
-            validUntilInput.value = "July 2025";
-          }
-        });
-        
-        updateMajors(userData.course, userData.department).then(() => {
-          majorSelect.value = userData.major;
-        });
-      });
-
-      updateCourses(userData.department).then(() => {
-        document.getElementById("course-select").value = userData.course;
-        updateMajors(userData.course, userData.department).then(() => {
-          document.getElementById("major-select").value = userData.major;
-        });
-      });
-      document.getElementById("grade-select").value = userData.grade;
-      document.getElementById("strand-select").value = userData.strand;
-      document.getElementById("year-select").value = userData.schoolYear;
-      document.getElementById("semester-select").value = userData.semester;
-
-      // Hide or show fields based on department
-      if (userData.department === "shs") {
-        document.querySelector(".course-input").style.display = "none";
-        document.querySelector(".major-input").style.display = "none";
-        document.querySelector(".grade-input").style.display = "block";
-        document.querySelector(".strand-input").style.display = "block";
-      } else {
-        document.querySelector(".course-input").style.display = "block";
-        document.querySelector(".major-input").style.display = "block";
-        document.querySelector(".grade-input").style.display = "none";
-        document.querySelector(".strand-input").style.display = "none";
-      }
-    }
+if (libraryIdNoParam && tokenParam) {
+  fetchUserData(libraryIdNoParam).then(() => {
+    // Optionally, after fetching, you could validate the token here if needed.
   }).catch((error) => {
     console.error("Error fetching document:", error);
   });
 }
 
-// Autofill Library ID and Valid Until Date
+// Another DOMContentLoaded block for auto-filling (if needed)
+// [This block might be redundant with the earlier one—ensure you adjust as needed]
 document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdInput = document.getElementById("library-id");
   const validUntilInput = document.getElementById("valid-until");
@@ -799,49 +620,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const urlParams = new URLSearchParams(window.location.search);
-  const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
+  const libraryIdNo = urlParams.get('libraryIdNo');
 
   if (libraryIdNo) {
-    // Fetch data for the specific Library ID
     try {
-      const userRef = doc(db, "LIDC_Users", libraryIdNo);
-      const docSnap = await getDoc(userRef);
-
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        // Fill input fields with existing user data
-        libraryIdInput.value = userData.libraryIdNo;
-        validUntilInput.value = userData.validUntil || "July 2025"; // Default if missing
-        displayUserData(userData); // Load other user details
-      } else {
-        console.error("No data found for the given Library ID.");
+      const response = await fetch(`http://192.168.0.20:8080/fetch_user.php?libraryIdNo=${libraryIdNo}`);
+      const userData = await response.json();
+      if (userData.error) {
+        console.error("Error: " + userData.error);
         alert("User not found.");
+      } else {
+        libraryIdInput.value = userData.libraryIdNo;
+        validUntilInput.value = userData.validUntil || "July 2025";
+        displayUserData(userData);
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   } else {
-    // Generate a new Library ID
-    try {
-      const libraryIdQuery = query(
-        collection(db, "LIDC_Users"),
-        orderBy("libraryIdNo", "desc"),
-        limit(1)
-      );
-      const querySnapshot = await getDocs(libraryIdQuery);
-      let newId = "00001"; // Default ID if no data exists
-      if (!querySnapshot.empty) {
-        const lastDoc = querySnapshot.docs[0];
-        const lastId = parseInt(lastDoc.data().libraryIdNo, 10);
-        newId = (lastId + 1).toString().padStart(5, "0");
-      }
-      libraryIdInput.value = newId;
-    } catch (error) {
-      console.error("Error generating Library ID:", error);
-      alert("Failed to generate Library ID. Please refresh the page.");
-    }
-
-    // Set Valid Until Date for new entries
     validUntilInput.value = "July 2025";
   }
 });
