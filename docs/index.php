@@ -9,13 +9,9 @@
 
   <title>ZPPSU Library Users Registration Form</title>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
   <!-- Correct QR Code Generator Library -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -35,7 +31,7 @@
         </div>
       </div>
     </div>
-    <form action="insert.php" method="POST">
+    <form id="userForm" action="insert.php" method="POST">
       <div class="data-input patron">
         <p>Type of Patron</p>
         <select required>
@@ -186,7 +182,7 @@
         <div class="data-input">
           <p>ID Number</p>
           <div class="input-wrapper">
-            <input type="text" id="library-id" />
+            <input type="text" id="library-id" readonly required />
           </div>
         </div>
         <div class="data-input">
@@ -202,7 +198,7 @@
     </form>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="js/qrcode.min.js"></script>
     <script type="module" src="index.js" defer></script>
     <!-- <script type="module" src="fiveserver.config.js"></script> -->
 </body>

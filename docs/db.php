@@ -3,6 +3,7 @@ $host = "localhost";  // Your database host (usually "localhost" for XAMPP)
 $user = "root";       // Your MySQL username (default is "root" in XAMPP)
 $pass = "";           // Your MySQL password (leave empty if no password)
 $dbname = "student_datas";  // Your database name
+$charset = 'utf8mb4';
 
 // Create connection
 $conn = new mysqli($host, $user, $pass, $dbname);

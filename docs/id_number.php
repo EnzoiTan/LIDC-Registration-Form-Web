@@ -23,7 +23,8 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $lastId = intval($row["libraryIdNo"]);
-    $newId = str_pad($lastId + 1, 5, "0", STR_PAD_LEFT);
+    $numericPart = intval($lastId); // Convert to int (removes leading zeros)
+    $newId = str_pad($numericPart + 1, 5, "0", STR_PAD_LEFT);
 } else {
     $newId = "00001"; // Default first ID
 }

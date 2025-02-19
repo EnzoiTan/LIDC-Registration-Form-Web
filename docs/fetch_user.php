@@ -14,7 +14,7 @@ $libraryIdNo = $_GET["libraryIdNo"] ?? "";
 
 if ($libraryIdNo) {
     $stmt = $conn->prepare("SELECT * FROM std_details WHERE libraryIdNo = ?");
-    $stmt->bind_param("s", $libraryIdNo);
+    $stmt->bind_param("i", $libraryIdNo);
     $stmt->execute();
     $result = $stmt->get_result();
 

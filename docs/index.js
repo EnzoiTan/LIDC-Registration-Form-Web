@@ -283,6 +283,30 @@ function updateMajors(course, department) {
   });
 }
 
+document.addEventListener("DOMContentLoaded", async () => {
+  const libraryIdInput = document.getElementById("library-id");
+
+  if (!libraryIdInput) {
+    console.error("Library ID input element not found.");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://192.168.0.21:8080/id_number.php");
+    const data = await response.json();
+
+    if (data.newLibraryId) {
+      // Set the new library ID in the input field
+      libraryIdInput.value = data.newLibraryId;
+    } else {
+      console.error("Error: Could not fetch new library ID.");
+    }
+  } catch (error) {
+    console.error("Error fetching new library ID:", error);
+  }
+});
+
+
 // Replace Firebase data fetching with AJAX calls to PHP endpoints
 document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdInput = document.getElementById("library-id");
@@ -324,7 +348,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (libraryIdNo) {
     // Fetch user data from XAMPP (PHP/MySQL)
     try {
-      const response = await fetch(`http://192.168.0.20:8080/fetch_user.php?libraryIdNo=${libraryIdNo}`);
+      const response = await fetch(`http://192.168.0.21:8080/fetch_user.php?libraryIdNo=${libraryIdNo}`);
       const userData = await response.json();
       if (userData.error) {
         console.error("Error: " + userData.error);
@@ -341,6 +365,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     validUntilInput.value = "July 2025";
   }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Select input fields
+  const nameInputs = document.querySelectorAll("input[type='text']");
+  const middleInitialInput = document.querySelector(".middle-initial input");
+
+  // Function to capitalize first letter of each word
+  function toTitleCase(str) {
+    return str.replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  // Auto capitalize words and insert spaces correctly
+  nameInputs.forEach(input => {
+    input.addEventListener("input", function () {
+      this.value = toTitleCase(this.value);
+    });
+  });
+
+  // Restrict Middle Initial to only one letter
+  middleInitialInput.addEventListener("input", function () {
+    this.value = this.value.toUpperCase().charAt(0); // Only allow one uppercase letter
+  });
 });
 
 // Generate Random Token remains the same
@@ -376,7 +423,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
   toggleLoading(true);
 
   try {
-    // Collect form data
+    // Collect form data (example code - ensure all selectors and variables are defined)
     const libraryIdInput = document.getElementById("library-id");
     const validUntilInput = document.getElementById("valid-until");
     const patron = document.querySelector(".patron select").value.trim();
@@ -392,12 +439,13 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     const schoolYear = document.querySelector(".year-sem-inputs .data-input:nth-child(1) select").value.trim();
     const semester = document.querySelector(".year-sem-inputs .data-input:nth-child(2) select").value.trim();
 
-    const libraryIdNo = libraryIdInput.value.trim();
+    // Parse library ID as integer (if that's how it's stored)
+    const libraryIdNo = parseInt(libraryIdInput.value.trim(), 10);
     const validUntil = validUntilInput.value.trim();
 
-    // Additional admin-related data
+    // Additional admin-related data (ensure these elements exist)
     const collegeSelect = document.querySelector(".data-input.college select").value.trim();
-    const schoolSelect = document.getElementById("school-select").value.trim();
+    const schoolSelectField = document.getElementById("school-select").value.trim();
     const specifySchoolInput = document.getElementById("specify-school-input").value.trim();
     const campusDept = document.querySelector(".data-input.campusdept select").value.trim();
 
@@ -418,32 +466,41 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
       schoolYear,
       semester,
       timesEntered: 1,
-      token: generateRandomToken(),
-      timestamp: new Date(),
+      token: generateRandomToken(), // Generate or use existing token
       collegeSelect,
-      schoolSelect,
-      specifySchool: schoolSelect === "other" ? specifySchoolInput : "",
+      schoolSelect: schoolSelectField,
+      specifySchool: schoolSelectField === "other" ? specifySchoolInput : "",
       campusDept,
-      entryTimestamps: [new Date()],
+      qrCodeURL: "",
+      qrCodeImage: "",
+      timestamp: new Date().toISOString()
     };
 
+    // Generate QR code data from a URL that includes the libraryIdNo and token
+    const fullQRCodeLink = `http://192.168.0.21:8080/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
+    const qrCodeData = await generateQRCodeData(fullQRCodeLink); // Pass the URL directly
+
+    // Update the userData object with the QR code data
+    userData.qrCodeURL = fullQRCodeLink;
+    userData.qrCodeImage = qrCodeData;
+
+    // Optionally, auto-download the QR code image immediately:
+    downloadQRCode(qrCodeData, `${libraryIdNo}.png`);
+
     // Send the data to the PHP endpoint
-    const response = await fetch("http://localhost:3000/docs/save_user.php", {
-      method: "POST", // Make sure method is POST
+    const response = await fetch("http://192.168.0.21:8080/save_user.php", {
+      method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(userData) // Convert data to JSON
+      body: JSON.stringify(userData)
     });
+
     const result = await response.json();
     if (result.error) {
       showModal(result.error);
     } else {
-      showModal(result.message);
-      if (result.qrCodeURL) {
-        // Optionally handle QR Code URL (download or display)
-        console.log("QR Code URL:", result.qrCodeURL);
-      }
+      showModal(result.success || result.message);
     }
   } catch (error) {
     console.error("Error storing data:", error);
@@ -452,7 +509,12 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     toggleLoading(false);
     submitButton.disabled = false;
   }
+
+  setTimeout(function () {
+    window.location.reload();
+  }, 2000); // Refresh after 2 seconds
 });
+
 
 // Show/hide "Specify School" input field when "Other" is selected
 document.getElementById("school-select").addEventListener("change", (event) => {
@@ -465,9 +527,9 @@ document.getElementById("school-select").addEventListener("change", (event) => {
 });
 
 // Generate QR Code and return as Base64 data URL remains unchanged
-async function generateQRCodeData(data) {
+async function generateQRCodeData(url) {
   try {
-    const qrDataURL = await QRCode.toDataURL(JSON.stringify(data), {
+    const qrDataURL = await QRCode.toDataURL(url, {
       width: 256,
       margin: 1,
     });
@@ -490,12 +552,12 @@ function downloadQRCode(dataURL, filename) {
 async function fetchUserData(libraryId) {
   toggleLoading(true);
   try {
-    const response = await fetch(`http://192.168.0.20:8080/fetch_user.php?libraryIdNo=${libraryId}`);
+    const response = await fetch(`http://192.168.0.21:8080/fetch_user.php?libraryIdNo=${libraryId}`);
     const data = await response.json();
     if (data.error) {
       showModal(data.error);
     } else {
-      displayUserData(data);
+      displayUserData(data); // Ensure this function handles all fields
     }
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -550,12 +612,26 @@ async function displayUserData(userData) {
 
   // Populate dynamic select fields if user data exists
   if (userData.department) {
-    await updateCourses(userData.department);
+    await updateCourses(userData.department); // Fetch courses
     document.getElementById("course-select").value = userData.course || "";
-    await updateMajors(userData.course, userData.department);
+    await updateMajors(userData.course, userData.department); // Fetch majors
     document.getElementById("major-select").value = userData.major || "";
   }
 
+  // Populate other fields
+  document.getElementById("library-id").value = userData.libraryIdNo || "";
+  document.getElementById("valid-until").value = userData.validUntil || "";
+  document.querySelector(".patron select").value = userData.patron || "";
+  document.querySelector(".name-inputs .data-input:nth-child(1) input").value = userData.lastName || "";
+  document.querySelector(".name-inputs .data-input:nth-child(2) input").value = userData.firstName || "";
+  document.querySelector(".name-inputs .data-input:nth-child(3) input").value = userData.middleInitial || "";
+  document.querySelector(".gender select").value = userData.gender || "";
+  document.getElementById("grade-select").value = userData.grade || "";
+  document.getElementById("strand-select").value = userData.strand || "";
+  document.querySelector(".year-sem-inputs .data-input:nth-child(1) select").value = userData.schoolYear || "";
+  document.querySelector(".year-sem-inputs .data-input:nth-child(2) select").value = userData.semester || "";
+
+  // Populate college and campus department if applicable
   if (userData.patron === 'faculty') {
     document.getElementById("college-select").value = userData.collegeSelect || "";
   } else if (userData.patron === 'admin') {
@@ -564,9 +640,9 @@ async function displayUserData(userData) {
     document.getElementById("school-select").value = userData.schoolSelect || "";
     if (userData.schoolSelect === 'other') {
       document.getElementById("specify-school-input").value = userData.specifySchool || "";
-      document.getElementById("specify-school-input").style.display = "block";
+      document.getElementById("specify-school-input").style.display = "block"; // Show the input field
     } else {
-      document.getElementById("specify-school-input").style.display = "none";
+      document.getElementById("specify-school-input").style.display = "none"; // Hide the input field
     }
   }
 
@@ -574,7 +650,7 @@ async function displayUserData(userData) {
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
     <p>Type of Patron: ${userData.patron}</p>
-    <p>Name: ${userData.firstName} ${userData.middleInitial} ${userData.lastName}</p>
+    <p>Name: ${userData.lastName}, ${userData.firstName} ${userData.middleInitial}</p>
     ${userData.department ? `<p>Department: ${userData.department}</p>` : ''}
     ${userData.course ? `<p>Course: ${userData.course}</p>` : ''}
     ${userData.major ? `<p>Major: ${userData.major}</p>` : ''}
@@ -591,7 +667,7 @@ async function displayUserData(userData) {
     ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
   `;
 
-  // Adjust field visibility
+  // Ensure fields are toggled correctly
   toggleFields(userData.patron);
 }
 
@@ -624,7 +700,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (libraryIdNo) {
     try {
-      const response = await fetch(`http://192.168.0.20:8080/fetch_user.php?libraryIdNo=${libraryIdNo}`);
+      const response = await fetch(`http://192.168.0.21:8080/fetch_user.php?libraryIdNo=${libraryIdNo}`);
       const userData = await response.json();
       if (userData.error) {
         console.error("Error: " + userData.error);
