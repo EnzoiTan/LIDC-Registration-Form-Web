@@ -14,11 +14,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $major = $_POST['major'];
     $schoolYear = $_POST['schoolYear'];
     $semester = $_POST['semester'];
-    $timestamp = date('Y-m-d H:i:s'); // Capture the current date and time
+    $timestamps = date('Y-m-d H:i:s'); // Capture the current date and time
 
     // SQL Query to insert data
-    $sql = "INSERT INTO std_details (libraryIdNo, validUntil, patron, lastName, firstName, middleInitial, gender, department, course, major, schoolYear, semester, timestamp)
-            VALUES ('$libraryIdNo', '$validUntil', '$patron', '$lastName', '$firstName', '$middleInitial', '$gender', '$department', '$course', '$major', '$schoolYear', '$semester', '$timestamp')";
+    $sql = "INSERT INTO std_details (libraryIdNo, validUntil, patron, lastName, firstName, middleInitial, gender, department, course, major, schoolYear, semester, timestamps)
+            VALUES ('$libraryIdNo', '$validUntil', '$patron', '$lastName', '$firstName', '$middleInitial', '$gender', '$department', '$course', '$major', '$schoolYear', '$semester', '$timestamps')";
 
     if ($conn->query($sql) === TRUE) {
         echo "New record added successfully!";

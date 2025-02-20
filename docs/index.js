@@ -20,7 +20,7 @@ style.innerHTML = `
     background: white;
     padding: 20px;
     border-radius: 8px;
-    text-align: center;
+    text-align: left;
     font-size: 1.1em;
     max-width: 500px;
     width: 300px;
@@ -30,6 +30,7 @@ style.innerHTML = `
     margin-top: 20px;
     padding: 6px 20px;
     background: #3498db;
+    text-align: right;
     color: white;
     border: none;
     border-radius: 4px;
@@ -143,6 +144,13 @@ const departmentCourses = {
         "Mechatronics Technology",
         "Power Plant Technology",
       ],
+    },
+  },
+  cahss: {
+    courses: {
+      "BS Development Communication": ["None"],
+      "Bachelor of Fine Arts": ["None"],
+      "Batsilyer sa Sining ng Filipino (BATSIFIL)": ["None"],
     },
   },
   sba: {
@@ -423,7 +431,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
   toggleLoading(true);
 
   try {
-    // Collect form data (example code - ensure all selectors and variables are defined)
+    // Collect form data
     const libraryIdInput = document.getElementById("library-id");
     const validUntilInput = document.getElementById("valid-until");
     const patron = document.querySelector(".patron select").value.trim();
@@ -439,17 +447,18 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     const schoolYear = document.querySelector(".year-sem-inputs .data-input:nth-child(1) select").value.trim();
     const semester = document.querySelector(".year-sem-inputs .data-input:nth-child(2) select").value.trim();
 
-    // Parse library ID as integer (if that's how it's stored)
     const libraryIdNo = parseInt(libraryIdInput.value.trim(), 10);
     const validUntil = validUntilInput.value.trim();
 
-    // Additional admin-related data (ensure these elements exist)
     const collegeSelect = document.querySelector(".data-input.college select").value.trim();
     const schoolSelectField = document.getElementById("school-select").value.trim();
     const specifySchoolInput = document.getElementById("specify-school-input").value.trim();
     const campusDept = document.querySelector(".data-input.campusdept select").value.trim();
 
-    // Prepare the data object
+    const token = generateRandomToken();
+    const qrCodeURL = `http://192.168.0.21:8080/?libraryIdNo=${libraryIdNo}&token=${token}`;
+    const qrCodeImage = await generateQRCodeData(qrCodeURL); // Generate the QR code
+
     const userData = {
       libraryIdNo,
       validUntil,
@@ -466,28 +475,17 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
       schoolYear,
       semester,
       timesEntered: 1,
-      token: generateRandomToken(), // Generate or use existing token
+      token,
       collegeSelect,
       schoolSelect: schoolSelectField,
       specifySchool: schoolSelectField === "other" ? specifySchoolInput : "",
       campusDept,
-      qrCodeURL: "",
-      qrCodeImage: "",
+      qrCodeURL,
+      qrCodeImage, // Include the QR image
       timestamp: new Date().toISOString()
     };
 
-    // Generate QR code data from a URL that includes the libraryIdNo and token
-    const fullQRCodeLink = `http://192.168.0.21:8080/?libraryIdNo=${libraryIdNo}&token=${userData.token}`;
-    const qrCodeData = await generateQRCodeData(fullQRCodeLink); // Pass the URL directly
-
-    // Update the userData object with the QR code data
-    userData.qrCodeURL = fullQRCodeLink;
-    userData.qrCodeImage = qrCodeData;
-
-    // Optionally, auto-download the QR code image immediately:
-    downloadQRCode(qrCodeData, `${libraryIdNo}.png`);
-
-    // Send the data to the PHP endpoint
+    // Send user data to PHP backend
     const response = await fetch("http://192.168.0.21:8080/save_user.php", {
       method: "POST",
       headers: {
@@ -497,9 +495,14 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     });
 
     const result = await response.json();
+
     if (result.error) {
       showModal(result.error);
     } else {
+      if (!result.exists) {
+        // Only download QR code if user is new
+        downloadQRCode(qrCodeImage, `${libraryIdNo}.png`);
+      }
       showModal(result.success || result.message);
     }
   } catch (error) {
@@ -509,12 +512,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     toggleLoading(false);
     submitButton.disabled = false;
   }
-
-  setTimeout(function () {
-    window.location.reload();
-  }, 2000); // Refresh after 2 seconds
 });
-
 
 // Show/hide "Specify School" input field when "Other" is selected
 document.getElementById("school-select").addEventListener("change", (event) => {
@@ -613,6 +611,8 @@ async function displayUserData(userData) {
   // Populate dynamic select fields if user data exists
   if (userData.department) {
     await updateCourses(userData.department); // Fetch courses
+    document.getElementById("department-select").value = userData.department || "";
+    await updateCourses(userData.department); // Fetch courses
     document.getElementById("course-select").value = userData.course || "";
     await updateMajors(userData.course, userData.department); // Fetch majors
     document.getElementById("major-select").value = userData.major || "";
@@ -652,7 +652,7 @@ async function displayUserData(userData) {
     <p>Type of Patron: ${userData.patron}</p>
     <p>Name: ${userData.lastName}, ${userData.firstName} ${userData.middleInitial}</p>
     ${userData.department ? `<p>Department: ${userData.department}</p>` : ''}
-    ${userData.course ? `<p>Course: ${userData.course}</p>` : ''}
+    ${userData.course ? `<p>Course: ${userData.course}</p>` : ''} 
     ${userData.major ? `<p>Major: ${userData.major}</p>` : ''}
     ${userData.grade ? `<p>Grade: ${userData.grade}</p>` : ''}
     ${userData.strand ? `<p>Strand: ${userData.strand}</p>` : ''}

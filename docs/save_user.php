@@ -1,10 +1,9 @@
 <?php
-header("Access-Control-Allow-Origin: *"); // Allow all origins (or specify your frontend: http://localhost:3000)
+header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    // Handle CORS preflight request
     http_response_code(200);
     exit();
 }
@@ -13,173 +12,125 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header("Content-Type: application/json");
 
-$file = 'debug_log.txt';  // Debug file
-file_put_contents($file, file_get_contents("php://input")); // Log request body
-
 require 'db.php';
+
+$file = 'debug_log.txt'; // Debug log file
 
 // Check if connection is successful
 if ($conn->connect_error) {
-    die(json_encode(["error" => "Database connection failed: " . $conn->connect_error]));
+    echo json_encode(["error" => "Database connection failed: " . $conn->connect_error]);
+    exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get raw POST data
-    $data = json_decode(file_get_contents("php://input"), true);
+// Read input data
+$data = json_decode(file_get_contents("php://input"), true);
 
-    // Check if JSON parsing failed
-    if ($data === null) {
-        echo json_encode(["error" => "Invalid JSON input"]);
-        exit;
+// Log incoming request
+file_put_contents($file, print_r($data, true), FILE_APPEND);
+
+if (!$data) {
+    echo json_encode(["error" => "Invalid JSON input"]);
+    exit();
+}
+
+// Extract user data
+$libraryIdNo   = $data['libraryIdNo'] ?? '';
+$validUntil    = $data['validUntil'] ?? '';
+$patron        = $data['patron'] ?? '';
+$firstName     = $data['firstName'] ?? '';
+$lastName      = $data['lastName'] ?? '';
+$middleInitial = $data['middleInitial'] ?? '';
+$gender        = $data['gender'] ?? '';
+$department    = $data['department'] ?? '';
+$course        = $data['course'] ?? '';
+$major         = $data['major'] ?? '';
+$grade         = $data['grade'] ?? '';
+$strand        = $data['strand'] ?? '';
+$schoolYear    = $data['schoolYear'] ?? '';
+$semester      = $data['semester'] ?? '';
+$token         = $data['token'] ?? '';
+$qrCodeURL     = $data['qrCodeURL'] ?? '';
+$qrCodeImage   = $data['qrCodeImage'] ?? '';
+$newTimestamp  = date('Y-m-d H:i:s'); // Current timestamp
+
+// Check if user already exists
+$checkSql = "SELECT timesEntered, timestamps FROM std_details WHERE libraryIdNo = ?";
+$checkStmt = $conn->prepare($checkSql);
+$checkStmt->bind_param("s", $libraryIdNo);
+$checkStmt->execute();
+$checkStmt->store_result();
+
+if ($checkStmt->num_rows > 0) {
+    // User exists, fetch existing timestamps and increment timesEntered
+    $checkStmt->bind_result($existingTimesEntered, $existingTimestamps);
+    $checkStmt->fetch();
+    $checkStmt->close();
+
+    $newTimesEntered = $existingTimesEntered + 1;
+
+    // Decode timestamps if they exist, otherwise create a new array
+    $timestampsArray = !empty($existingTimestamps) ? json_decode($existingTimestamps, true) : [];
+    if (!is_array($timestampsArray)) {
+        $timestampsArray = []; // Ensure it's an array if decoding fails
     }
 
-    // Log the parsed data for debugging
-    file_put_contents($file, print_r($data, true));
+    // Append new timestamp
+    $timestampsArray[] = $newTimestamp;
+    $updatedTimestamps = json_encode($timestampsArray); // Convert array back to JSON string
 
-    // Extract data with default values for optional fields
-    $firstName     = $data['firstName'] ?? '';
-    $lastName      = $data['lastName'] ?? '';
-    $name          = trim($firstName . ' ' . $lastName);
-    $department    = $data['department'] ?? '';
-    $libraryIdNo   = $data['libraryIdNo'] ?? '';
-    $validUntil    = $data['validUntil'] ?? '';
-    $patron        = $data['patron'] ?? '';
-    $middleInitial = $data['middleInitial'] ?? '';
-    $gender        = $data['gender'] ?? '';
-    $course        = $data['course'] ?? '';
-    $major         = $data['major'] ?? '';
-    $grade         = $data['grade'] ?? '';
-    $strand        = $data['strand'] ?? '';
-    $schoolYear    = $data['schoolYear'] ?? '';
-    $semester      = $data['semester'] ?? '';
-    $timesEntered  = $data['timesEntered'] ?? 0;
-    $token         = $data['token'] ?? '';
+    // Update database with new timestamp and increment timesEntered
+    $updateSql = "UPDATE std_details SET timesEntered = ?, timestamps = ? WHERE libraryIdNo = ?";
+    $updateStmt = $conn->prepare($updateSql);
+    $updateStmt->bind_param("iss", $newTimesEntered, $updatedTimestamps, $libraryIdNo);
 
-    // For non-student patron types, these fields might be required:
-    if ($patron === 'student') {
-        // For students, we require name and department (you can add more if needed)
-        if (empty($name) || empty($department)) {
-            echo json_encode(["error" => "Name and Department are required for students"]);
-            exit;
-        }
-        // Clear fields not applicable to students
-        $collegeSelect = '';
-        $schoolSelect  = '';
-        $specifySchool = '';
-        $campusDept    = '';
-    } elseif ($patron === 'faculty') {
-        // For faculty, require name and collegeSelect
-        $collegeSelect = $data['collegeSelect'] ?? '';
-        if (empty($name) || empty($collegeSelect)) {
-            echo json_encode(["error" => "Name and College/Department are required for faculty"]);
-            exit;
-        }
-        // Set other optional fields to default
-        $schoolSelect  = '';
-        $specifySchool = '';
-        $campusDept    = '';
-    } elseif ($patron === 'admin') {
-        // For admin, require name and campusDept
-        $campusDept = $data['campusDept'] ?? '';
-        if (empty($name) || empty($campusDept)) {
-            echo json_encode(["error" => "Name and Office are required for admin"]);
-            exit;
-        }
-        // Set other optional fields to default
-        $collegeSelect = '';
-        $schoolSelect  = '';
-        $specifySchool = '';
-    } elseif ($patron === 'visitor') {
-        // For visitors, require name and schoolSelect
-        $schoolSelect = $data['schoolSelect'] ?? '';
-        if (empty($name) || empty($schoolSelect)) {
-            echo json_encode(["error" => "Name and School are required for visitors"]);
-            exit;
-        }
-        // If schoolSelect is 'other', use specifySchool; otherwise, set empty.
-        $specifySchool = ($schoolSelect === 'other') ? ($data['specifySchool'] ?? '') : '';
-        // Set other optional fields to default
-        $collegeSelect = '';
-        $campusDept    = '';
+    if ($updateStmt->execute()) {
+        echo json_encode(["exists" => true, "message" => "Welcome back! Entry recorded.", "timesEntered" => $newTimesEntered]);
     } else {
-        echo json_encode(["error" => "Invalid patron type"]);
-        exit;
+        echo json_encode(["error" => "Failed to update user: " . $updateStmt->error]);
     }
 
-    // QR Code fields (optional)
-    $qrCodeURL   = $data['qrCodeURL'] ?? '';
-    $qrCodeImage = $data['qrCodeImage'] ?? '';
-    $timestamp   = $data['timestamp'] ?? date('Y-m-d H:i:s');
-
-    // Debug: Log the final values being inserted
-    $insertData = [
-        $libraryIdNo,
-        $validUntil,
-        $patron,
-        $lastName,
-        $firstName,
-        $middleInitial,
-        $gender,
-        $department,
-        $course,
-        $major,
-        $grade,
-        $strand,
-        $schoolYear,
-        $semester,
-        $timesEntered,
-        $token,
-        $collegeSelect,
-        $schoolSelect,
-        $specifySchool,
-        $campusDept,
-        $qrCodeURL,
-        $qrCodeImage,
-        $timestamp,
-        $name
-    ];
-    file_put_contents($file, print_r($insertData, true), FILE_APPEND);
-
-    // Prepare and execute the query (24 columns)
-    $stmt = $conn->prepare("INSERT INTO std_details (libraryIdNo, validUntil, patron, lastName, firstName, middleInitial, gender, department, course, major, grade, strand, schoolYear, semester, timesEntered, token, collegeSelect, schoolSelect, specifySchool, campusDept, qrCodeURL, qrCodeImage, timestamp, name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-    // Format string: 14 s, 1 i, then 9 s => "ssssssssssssssisssssssss"
-    $stmt->bind_param(
-        "ssssssssssssssisssssssss",
-        $libraryIdNo,
-        $validUntil,
-        $patron,
-        $lastName,
-        $firstName,
-        $middleInitial,
-        $gender,
-        $department,
-        $course,
-        $major,
-        $grade,
-        $strand,
-        $schoolYear,
-        $semester,
-        $timesEntered,
-        $token,
-        $collegeSelect,
-        $schoolSelect,
-        $specifySchool,
-        $campusDept,
-        $qrCodeURL,
-        $qrCodeImage,
-        $timestamp,
-        $name
-    );
-
-    if ($stmt->execute()) {
-        echo json_encode(["success" => "User saved successfully"]);
-    } else {
-        echo json_encode(["error" => "Failed to save user: " . $stmt->error]);
-    }
-
-    $stmt->close();
+    $updateStmt->close();
     $conn->close();
-} else {
-    echo json_encode(["error" => "Invalid request method"]);
+    exit();
 }
+$checkStmt->close();
+
+// Insert new user
+$timesEntered = 1; // First entry
+$timestamps = json_encode([$newTimestamp]); // Store timestamp as JSON array in TEXT column
+
+$insertSql = "INSERT INTO std_details (libraryIdNo, validUntil, patron, lastName, firstName, middleInitial, gender, department, course, major, grade, strand, schoolYear, semester, timesEntered, token, qrCodeURL, qrCodeImage, timestamps)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+$stmt = $conn->prepare($insertSql);
+$stmt->bind_param(
+    "ssssssssssssssissss",
+    $libraryIdNo,
+    $validUntil,
+    $patron,
+    $lastName,
+    $firstName,
+    $middleInitial,
+    $gender,
+    $department,
+    $course,
+    $major,
+    $grade,
+    $strand,
+    $schoolYear,
+    $semester,
+    $timesEntered,
+    $token,
+    $qrCodeURL,
+    $qrCodeImage,
+    $timestamps
+);
+
+if ($stmt->execute()) {
+    echo json_encode(["success" => "User saved successfully!", "exists" => false, "timesEntered" => 1]);
+} else {
+    echo json_encode(["error" => "Failed to save user: " . $stmt->error]);
+}
+
+$stmt->close();
+$conn->close();

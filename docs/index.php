@@ -131,7 +131,8 @@
           <p>Office</p>
           <select id="campusdept-select" required>
             <option value="" disabled selected>Select Office</option>
-            <option value="Registrar">Registrar</option>
+            <option value="University Registrar">University Registrar</option>
+            <option value="Alumni">Alumni</option>
             <option value="Medical and Dental Clinic">Medical and Dental Clinic</option>
             <option value="Cashier">Cashier</option>
             <option value="Office and the Vice President for Student Affairs">Office and the Vice President for Student Affairs</option>
