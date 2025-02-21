@@ -14,19 +14,8 @@ header("Content-Type: application/json");
 
 require 'db.php';
 
-$file = 'debug_log.txt'; // Debug log file
-
-// Check if connection is successful
-if ($conn->connect_error) {
-    echo json_encode(["error" => "Database connection failed: " . $conn->connect_error]);
-    exit();
-}
-
 // Read input data
 $data = json_decode(file_get_contents("php://input"), true);
-
-// Log incoming request
-file_put_contents($file, print_r($data, true), FILE_APPEND);
 
 if (!$data) {
     echo json_encode(["error" => "Invalid JSON input"]);
@@ -51,9 +40,15 @@ $semester      = $data['semester'] ?? '';
 $token         = $data['token'] ?? '';
 $qrCodeURL     = $data['qrCodeURL'] ?? '';
 $qrCodeImage   = $data['qrCodeImage'] ?? '';
-$newTimestamp  = date('Y-m-d H:i:s'); // Current timestamp
+$newTimestamp  = date('Y-m-d H:i:s'); // Get current timestamp
 
-// Check if user already exists
+$collegeSelect = $data['collegeSelect'] ?? '';
+$schoolSelect  = $data['schoolSelect'] ?? '';
+$specifySchool = ($schoolSelect === 'other') ? $data['specifySchool'] ?? '' : '';
+$campusDept    = $data['campusDept'] ?? '';
+$name          = trim("$lastName, $firstName $middleInitial.");
+
+// ✅ Check if user already exists
 $checkSql = "SELECT timesEntered, timestamps FROM std_details WHERE libraryIdNo = ?";
 $checkStmt = $conn->prepare($checkSql);
 $checkStmt->bind_param("s", $libraryIdNo);
@@ -61,30 +56,28 @@ $checkStmt->execute();
 $checkStmt->store_result();
 
 if ($checkStmt->num_rows > 0) {
-    // User exists, fetch existing timestamps and increment timesEntered
+    // User exists, update `timesEntered`
     $checkStmt->bind_result($existingTimesEntered, $existingTimestamps);
     $checkStmt->fetch();
     $checkStmt->close();
 
     $newTimesEntered = $existingTimesEntered + 1;
 
-    // Decode timestamps if they exist, otherwise create a new array
+    // Decode timestamps, append new timestamp
     $timestampsArray = !empty($existingTimestamps) ? json_decode($existingTimestamps, true) : [];
     if (!is_array($timestampsArray)) {
-        $timestampsArray = []; // Ensure it's an array if decoding fails
+        $timestampsArray = [];
     }
-
-    // Append new timestamp
     $timestampsArray[] = $newTimestamp;
-    $updatedTimestamps = json_encode($timestampsArray); // Convert array back to JSON string
+    $updatedTimestamps = json_encode($timestampsArray);
 
-    // Update database with new timestamp and increment timesEntered
+    // ✅ Update `timesEntered` and `timestamps`
     $updateSql = "UPDATE std_details SET timesEntered = ?, timestamps = ? WHERE libraryIdNo = ?";
     $updateStmt = $conn->prepare($updateSql);
     $updateStmt->bind_param("iss", $newTimesEntered, $updatedTimestamps, $libraryIdNo);
 
     if ($updateStmt->execute()) {
-        echo json_encode(["exists" => true, "message" => "Welcome back! Entry recorded.", "timesEntered" => $newTimesEntered]);
+        echo json_encode(["exists" => true, "message" => "Entry recorded.", "timesEntered" => $newTimesEntered]);
     } else {
         echo json_encode(["error" => "Failed to update user: " . $updateStmt->error]);
     }
@@ -95,16 +88,16 @@ if ($checkStmt->num_rows > 0) {
 }
 $checkStmt->close();
 
-// Insert new user
-$timesEntered = 1; // First entry
-$timestamps = json_encode([$newTimestamp]); // Store timestamp as JSON array in TEXT column
+// ✅ Insert new user (first-time entry)
+$timesEntered = 1;
+$timestamps = json_encode([$newTimestamp]);
 
-$insertSql = "INSERT INTO std_details (libraryIdNo, validUntil, patron, lastName, firstName, middleInitial, gender, department, course, major, grade, strand, schoolYear, semester, timesEntered, token, qrCodeURL, qrCodeImage, timestamps)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+$insertSql = "INSERT INTO std_details (libraryIdNo, validUntil, patron, lastName, firstName, middleInitial, gender, department, course, major, grade, strand, schoolYear, semester, timesEntered, token, collegeSelect, schoolSelect, specifySchool, campusDept, qrCodeURL, qrCodeImage, timestamps, name)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($insertSql);
 $stmt->bind_param(
-    "ssssssssssssssissss",
+    "ssssssssssssssisssssssss",
     $libraryIdNo,
     $validUntil,
     $patron,
@@ -121,9 +114,14 @@ $stmt->bind_param(
     $semester,
     $timesEntered,
     $token,
+    $collegeSelect,
+    $schoolSelect,
+    $specifySchool,
+    $campusDept,
     $qrCodeURL,
     $qrCodeImage,
-    $timestamps
+    $timestamps,
+    $name
 );
 
 if ($stmt->execute()) {

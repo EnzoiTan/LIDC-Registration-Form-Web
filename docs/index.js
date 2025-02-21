@@ -459,6 +459,9 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     const qrCodeURL = `http://192.168.0.21:8080/?libraryIdNo=${libraryIdNo}&token=${token}`;
     const qrCodeImage = await generateQRCodeData(qrCodeURL); // Generate the QR code
 
+    // Construct full name
+    const name = `${lastName}, ${firstName} ${middleInitial}.`.trim();
+
     const userData = {
       libraryIdNo,
       validUntil,
@@ -482,7 +485,8 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
       campusDept,
       qrCodeURL,
       qrCodeImage, // Include the QR image
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      name // Include full name
     };
 
     // Send user data to PHP backend
@@ -513,6 +517,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     submitButton.disabled = false;
   }
 });
+
 
 // Show/hide "Specify School" input field when "Other" is selected
 document.getElementById("school-select").addEventListener("change", (event) => {
