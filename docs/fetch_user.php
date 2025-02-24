@@ -21,8 +21,11 @@ if ($libraryIdNo) {
     if ($row = $result->fetch_assoc()) {
         echo json_encode($row);
     } else {
-        echo json_encode(["error" => "User not found"]);
-    }
+        echo json_encode([
+            "error" => "❌ User not found!",
+            "alertType" => "error",
+        ]);
+    };
     $stmt->close();
 } else {
     echo json_encode(["error" => "Invalid Library ID"]);

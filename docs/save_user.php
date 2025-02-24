@@ -18,7 +18,7 @@ require 'db.php';
 $data = json_decode(file_get_contents("php://input"), true);
 
 if (!$data) {
-    echo json_encode(["error" => "Invalid JSON input"]);
+    echo json_encode(["error" => "Invalid JSON input", "alertType" => "error"]);
     exit();
 }
 
@@ -77,9 +77,14 @@ if ($checkStmt->num_rows > 0) {
     $updateStmt->bind_param("iss", $newTimesEntered, $updatedTimestamps, $libraryIdNo);
 
     if ($updateStmt->execute()) {
-        echo json_encode(["exists" => true, "message" => "Entry recorded.", "timesEntered" => $newTimesEntered]);
+        echo json_encode([
+            "exists" => true,
+            "message" => "✅ Good day, $lastName! Your entry has been recorded.",
+            "timesEntered" => $newTimesEntered,
+            "alertType" => "success"
+        ]);
     } else {
-        echo json_encode(["error" => "Failed to update user: " . $updateStmt->error]);
+        echo json_encode(["error" => "❌ Failed to update user: " . $updateStmt->error, "alertType" => "error"]);
     }
 
     $updateStmt->close();
@@ -125,9 +130,14 @@ $stmt->bind_param(
 );
 
 if ($stmt->execute()) {
-    echo json_encode(["success" => "User saved successfully!", "exists" => false, "timesEntered" => 1]);
+    echo json_encode([
+        "success" => "✅ User saved successfully!",
+        "exists" => false,
+        "timesEntered" => 1,
+        "alertType" => "success"
+    ]);
 } else {
-    echo json_encode(["error" => "Failed to save user: " . $stmt->error]);
+    echo json_encode(["error" => "❌ Failed to save user: " . $stmt->error, "alertType" => "error"]);
 }
 
 $stmt->close();

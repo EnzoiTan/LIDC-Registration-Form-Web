@@ -94,20 +94,24 @@ button.cancel:hover {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
+
 @keyframes slideIn {
   from {
     transform: translateY(-20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
   }
 }
+
 .logos {
   display: flex;
   gap: 8px;
@@ -135,30 +139,37 @@ body {
   border-radius: 5px;
   overflow-y: auto;
 }
+
 .container::-webkit-scrollbar {
   width: 12px;
 }
+
 .container::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 5px;
 }
+
 .container::-webkit-scrollbar-thumb {
   background: #b1b1b1;
   border-radius: 5px;
 }
+
 .container::-webkit-scrollbar-thumb:hover {
   background: #838383;
 }
+
 .container .logo-zppsu {
   display: flex;
   margin-bottom: 20px;
   gap: 15px;
 }
+
 .container .logo-zppsu img {
   width: 80px;
   height: 80px;
   margin-bottom: 8px;
 }
+
 .container .logo-zppsu .title {
   font-size: 1.4em;
   font-weight: 600;
@@ -167,17 +178,20 @@ body {
   position: relative;
   top: 3px;
 }
+
 .container .lidc-title {
   font-weight: 600;
   color: rgb(22, 24, 41);
   margin-bottom: 35px;
 }
+
 .container .lidc-title p {
   font-size: 2.2em;
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   margin: 0;
   color: rgb(22, 24, 41);
 }
+
 .container .lidc-title span {
   color: rgb(22, 24, 41);
   font-size: 1.5em;
@@ -187,31 +201,43 @@ body {
   position: relative;
   top: -10px;
 }
+
 .container .name-inputs,
 .container .course-year-inputs {
   display: flex;
   gap: 20px;
 }
+
 .container .data-input {
-  flex: 1; /* Ensure equal width for all inputs */
+  flex: 1;
+  /* Ensure equal width for all inputs */
   text-align: left;
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
 }
-.container .data-input input, .container .data-input select {
-  width: 100%; /* Make input/select elements fill their containers */
+
+.container .data-input input,
+.container .data-input select {
+  width: 100%;
+  /* Make input/select elements fill their containers */
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 3px;
-  box-sizing: border-box; /* Prevent padding from affecting width */
+  box-sizing: border-box;
+  /* Prevent padding from affecting width */
 }
+
 .container .middle-initial {
-  flex: 0.2; /* Reduce the width for the middle initial input */
+  flex: 0.2;
+  /* Reduce the width for the middle initial input */
 }
+
 .container .gender {
-  flex: 0.3; /* Ensure smaller width for the gender dropdown */
+  flex: 0.3;
+  /* Ensure smaller width for the gender dropdown */
 }
+
 .container select {
   width: 100%;
   height: 32px;
@@ -224,7 +250,9 @@ body {
   display: flex;
   flex-direction: column;
 }
-.data-input input, .data-input select {
+
+.data-input input,
+.data-input select {
   width: 100%;
   padding: 5px;
   border: 1px solid #ccc;
@@ -241,6 +269,7 @@ body {
   display: flex;
   gap: 20px;
 }
+
 .shs-selection .data-input {
   flex: 1;
 }
@@ -254,6 +283,7 @@ body {
   display: flex;
   gap: 20px;
 }
+
 .year-sem-inputs .data-input {
   flex: 3;
 }
@@ -262,6 +292,7 @@ body {
   display: flex;
   gap: 20px;
 }
+
 .generate-data .data-input {
   flex: 3;
 }
@@ -270,12 +301,15 @@ body {
   display: flex;
   gap: 20px;
 }
+
 .course-year-inputs .department-input {
   flex: 3;
 }
+
 .course-year-inputs .course-input {
   flex: 3;
 }
+
 .course-year-inputs .year-input {
   flex: 3;
 }
@@ -331,48 +365,63 @@ select {
 
 @media (max-width: 768px) {
   body {
-    background-color: #8b2c2c; /* Removed duplicate background-color */
+    background-color: #8b2c2c;
+    /* Removed duplicate background-color */
     font-family: Arial, sans-serif;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow-y: auto; /* Changed to auto for better scrolling behavior */
+    overflow-y: auto;
+    /* Changed to auto for better scrolling behavior */
     margin: 10px;
   }
+
   .container {
     background-color: #fff;
-    width: 90%; /* Use percentage to make it responsive */
-    max-width: 800px; /* Ensure it doesn't exceed a specific size */
-    height: auto; /* Allow height to adjust based on content */
+    width: 90%;
+    /* Use percentage to make it responsive */
+    max-width: 800px;
+    /* Ensure it doesn't exceed a specific size */
+    height: auto;
+    /* Allow height to adjust based on content */
     border-radius: 5px;
-    overflow-y: auto; /* Enable scrolling if content overflows */
+    overflow-y: auto;
+    /* Enable scrolling if content overflows */
     padding: 30px;
   }
+
   .logo-zppsu img {
     width: 60px !important;
     height: 60px !important;
   }
+
   .logo-zppsu .title {
     font-size: 1.1rem !important;
     top: -8px !important;
   }
+
   .lidc-title p {
     font-size: 1.5rem !important;
     font-weight: bold !important;
   }
+
   .lidc-title span {
     font-size: 1.2rem !important;
     top: 0px !important;
   }
+
   .name-inputs,
   .course-year-inputs {
-    display: flex; /* Ensure flexbox layout applies */
+    display: flex;
+    /* Ensure flexbox layout applies */
     flex-direction: column;
-    gap: 0 !important; /* Override other styles */
+    gap: 0 !important;
+    /* Override other styles */
     margin: 0 !important;
     padding: 0 !important;
   }
+
   .logo-zppsu {
     flex-direction: column;
     gap: 0px !important;
@@ -380,6 +429,7 @@ select {
     align-items: center !important;
   }
 }
+
 .input-wrapper {
   display: flex;
   align-items: center;
@@ -392,4 +442,6 @@ select {
 
 .input-wrapper button {
   flex-shrink: 0;
-}/*# sourceMappingURL=index.css.map */
+}
+
+/*# sourceMappingURL=index.css.map */

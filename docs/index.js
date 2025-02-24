@@ -1,45 +1,72 @@
 /* Remove Firebase imports – we no longer use Firebase */
 
-// CSS for modal and loading spinner
+// Inject CSS for modal, loading spinner, and other styles
 const style = document.createElement('style');
 style.innerHTML = `
-  /* Modal Styles */
-  .modal {
-    display: none;
+  /* Modal Background */
+  .custom-modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
+    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
   }
+  /* Modal Content */
   .modal-content {
     background: white;
     padding: 20px;
-    border-radius: 8px;
-    text-align: left;
-    font-size: 1.1em;
-    max-width: 500px;
-    width: 300px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    width: 320px;
+    animation: fadeIn 0.3s ease-in-out;
   }
-  #modal-close {
-    margin-top: 20px;
-    padding: 6px 20px;
-    background: #3498db;
-    text-align: right;
+  /* Checkmark / Error Icon */
+  .modal-icon {
+    padding: 0;
+    margin-bottom: 15px;
+  }
+  p {
+    padding: 0;
+  }
+  /* Error Icon */
+  .modal-content.error .modal-icon::before {
+    content: '❌';
+    color: #dc3545;
+  }
+  /* Message Text */
+  .modal-content p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  /* OK Button */
+  .modal-button {
+    background: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
+    padding: 8px 30px;
+    margin-bottom: 5px;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
   }
-  #modal-close:hover {
-    background: #2980b9;
+  .modal-button:hover {
+    background: #0056b3;
   }
-
+  /* Fade-in Animation */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
   /* Loading Spinner Styles */
   .loading-overlay {
     display: none;
@@ -68,16 +95,22 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
-// Create the modal
-const modal = document.createElement('div');
-modal.className = 'modal';
-modal.innerHTML = `
-  <div class="modal-content">
-    <p id="modal-message"></p>
-    <button id="modal-close">OK</button>
-  </div>
-`;
-document.body.appendChild(modal);
+// Modal function – displays a modal with a message and an "Okay" button
+function showModal(message, isSuccess = true) {
+  const modal = document.createElement("div");
+  modal.classList.add("custom-modal");
+  modal.innerHTML = `
+    <div class="modal-content ${isSuccess ? '' : 'error'}">
+      <div class="modal-icon"></div>
+      <p class="message">${message.replace(/\n/g, "<br>")}</p>
+      <button class="modal-button">Okay</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector(".modal-button").addEventListener("click", () => {
+    modal.remove();
+  });
+}
 
 // Create the loading overlay
 const loadingOverlay = document.createElement('div');
@@ -85,7 +118,7 @@ loadingOverlay.className = 'loading-overlay';
 loadingOverlay.innerHTML = '<div class="loading-spinner"></div>';
 document.body.appendChild(loadingOverlay);
 
-// The departmentCourses object remains unchanged
+// Department courses (unchanged)
 const departmentCourses = {
   cics: {
     courses: {
@@ -213,7 +246,7 @@ const departmentCourses = {
   },
 };
 
-// DOM Elements
+// DOM Elements for select inputs
 const departmentSelect = document.getElementById("department-select");
 const courseSelect = document.getElementById("course-select");
 const majorSelect = document.getElementById("major-select");
@@ -229,19 +262,18 @@ departmentSelect.addEventListener("change", () => {
   const selectedDepartment = departmentSelect.value;
   updateCourses(selectedDepartment);
   updateMajors(null); // Clear majors
-
   if (selectedDepartment === "shs") {
     gradeInputDiv.style.display = "block";
     strandInputDiv.style.display = "block";
     courseInputDiv.style.display = "none";
     majorInputDiv.style.display = "none";
-    collegeInputDiv.style.display = "none"; // Hide college input for SHS
+    collegeInputDiv.style.display = "none";
   } else {
     gradeInputDiv.style.display = "none";
     strandInputDiv.style.display = "none";
     courseInputDiv.style.display = "block";
     majorInputDiv.style.display = "block";
-    collegeInputDiv.style.display = "block"; // Show college input for non-SHS
+    collegeInputDiv.style.display = "block";
   }
 });
 
@@ -291,20 +323,17 @@ function updateMajors(course, department) {
   });
 }
 
+// On DOMContentLoaded, fetch the new library ID for new users
 document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdInput = document.getElementById("library-id");
-
   if (!libraryIdInput) {
     console.error("Library ID input element not found.");
     return;
   }
-
   try {
     const response = await fetch("http://192.168.0.21:8080/id_number.php");
     const data = await response.json();
-
     if (data.newLibraryId) {
-      // Set the new library ID in the input field
       libraryIdInput.value = data.newLibraryId;
     } else {
       console.error("Error: Could not fetch new library ID.");
@@ -314,8 +343,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-
-// Replace Firebase data fetching with AJAX calls to PHP endpoints
+// Fetch user data if URL parameters exist
 document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdInput = document.getElementById("library-id");
   const validUntilInput = document.getElementById("valid-until");
@@ -323,25 +351,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   const schoolSelect = document.querySelector('.school');
   const schoolSelected = document.querySelector('.school select');
   const specifySchoolInput = document.getElementById("specify-school-input");
-
   if (!libraryIdInput || !validUntilInput || !patronSelect) {
     console.error("One or more required DOM elements are missing.");
     return;
   }
-
   const urlParams = new URLSearchParams(window.location.search);
-  const libraryIdNo = urlParams.get('libraryIdNo'); // Get ID from URL if available
-
-  // Event listener for when patron type is changed
+  const libraryIdNo = urlParams.get('libraryIdNo');
   document.querySelector('.patron select').addEventListener('change', (event) => {
     toggleFields(event.target.value);
   });
-
-  // Initialize fields based on default patron type
   if (patronSelect) {
     toggleFields(patronSelect.value);
   }
-
   const toggleSpecifySchoolInput = () => {
     if (schoolSelected && schoolSelected.value === 'other') {
       specifySchoolInput.style.display = 'block';
@@ -349,18 +370,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       specifySchoolInput.style.display = 'none';
     }
   };
-
   schoolSelect.addEventListener('change', toggleSpecifySchoolInput);
   toggleSpecifySchoolInput();
-
   if (libraryIdNo) {
-    // Fetch user data from XAMPP (PHP/MySQL)
     try {
       const response = await fetch(`http://192.168.0.21:8080/fetch_user.php?libraryIdNo=${libraryIdNo}`);
       const userData = await response.json();
       if (userData.error) {
         console.error("Error: " + userData.error);
-        alert("User not found.");
       } else {
         libraryIdInput.value = userData.libraryIdNo;
         validUntilInput.value = userData.validUntil || "July 2025";
@@ -375,30 +392,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
+// Auto-capitalize name inputs and restrict middle initial to one letter
 document.addEventListener("DOMContentLoaded", function () {
-  // Select input fields
   const nameInputs = document.querySelectorAll("input[type='text']");
   const middleInitialInput = document.querySelector(".middle-initial input");
-
-  // Function to capitalize first letter of each word
   function toTitleCase(str) {
     return str.replace(/\b\w/g, char => char.toUpperCase());
   }
-
-  // Auto capitalize words and insert spaces correctly
   nameInputs.forEach(input => {
     input.addEventListener("input", function () {
       this.value = toTitleCase(this.value);
     });
   });
-
-  // Restrict Middle Initial to only one letter
   middleInitialInput.addEventListener("input", function () {
-    this.value = this.value.toUpperCase().charAt(0); // Only allow one uppercase letter
+    this.value = this.value.toUpperCase().charAt(0);
   });
 });
 
-// Generate Random Token remains the same
+// Generate a random token
 function generateRandomToken() {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let token = "";
@@ -408,28 +419,16 @@ function generateRandomToken() {
   return token;
 }
 
-function showModal(message) {
-  const modalMessage = document.getElementById('modal-message');
-  modalMessage.textContent = message;
-  modal.style.display = 'flex';
-}
-
-document.getElementById('modal-close').addEventListener('click', () => {
-  modal.style.display = 'none';
-});
-
 function toggleLoading(show) {
   loadingOverlay.style.display = show ? 'flex' : 'none';
 }
 
-// Submit event listener now calls the PHP endpoint to save data
+// Updated submit event: now downloads an ID card (with user info and QR code) instead of auto-downloading the QR code
 document.querySelector(".submit").addEventListener("click", async (event) => {
   event.preventDefault();
-
   const submitButton = document.querySelector(".submit");
   submitButton.disabled = true;
   toggleLoading(true);
-
   try {
     // Collect form data
     const libraryIdInput = document.getElementById("library-id");
@@ -446,22 +445,16 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     const strand = strandSelect.value.trim();
     const schoolYear = document.querySelector(".year-sem-inputs .data-input:nth-child(1) select").value.trim();
     const semester = document.querySelector(".year-sem-inputs .data-input:nth-child(2) select").value.trim();
-
-    const libraryIdNo = parseInt(libraryIdInput.value.trim(), 10);
+    let libraryIdNo = libraryIdInput.value.trim();
     const validUntil = validUntilInput.value.trim();
-
     const collegeSelect = document.querySelector(".data-input.college select").value.trim();
     const schoolSelectField = document.getElementById("school-select").value.trim();
     const specifySchoolInput = document.getElementById("specify-school-input").value.trim();
     const campusDept = document.querySelector(".data-input.campusdept select").value.trim();
-
     const token = generateRandomToken();
     const qrCodeURL = `http://192.168.0.21:8080/?libraryIdNo=${libraryIdNo}&token=${token}`;
-    const qrCodeImage = await generateQRCodeData(qrCodeURL); // Generate the QR code
-
-    // Construct full name
+    const qrCodeImage = await generateQRCodeData(qrCodeURL);
     const name = `${lastName}, ${firstName} ${middleInitial}.`.trim();
-
     const userData = {
       libraryIdNo,
       validUntil,
@@ -477,35 +470,30 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
       strand: department === "shs" ? strand : "",
       schoolYear,
       semester,
-      timesEntered: 1,
+      timesEntered: 1, // For new users, adjust via backend if updating
       token,
       collegeSelect,
       schoolSelect: schoolSelectField,
       specifySchool: schoolSelectField === "other" ? specifySchoolInput : "",
       campusDept,
       qrCodeURL,
-      qrCodeImage, // Include the QR image
+      qrCodeImage,
       timestamp: new Date().toISOString(),
-      name // Include full name
+      name
     };
 
-    // Send user data to PHP backend
     const response = await fetch("http://192.168.0.21:8080/save_user.php", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData)
     });
-
     const result = await response.json();
-
     if (result.error) {
       showModal(result.error);
     } else {
       if (!result.exists) {
-        // Only download QR code if user is new
-        downloadQRCode(qrCodeImage, `${libraryIdNo}.png`);
+        // Download the full ID card (with user info and QR code) instead of just the QR code
+        downloadIdCard(userData);
       }
       showModal(result.success || result.message);
     }
@@ -518,18 +506,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
   }
 });
 
-
-// Show/hide "Specify School" input field when "Other" is selected
-document.getElementById("school-select").addEventListener("change", (event) => {
-  const specifySchoolInput = document.getElementById("specify-school-input");
-  if (event.target.value === "other") {
-    specifySchoolInput.style.display = "block";
-  } else {
-    specifySchoolInput.style.display = "none";
-  }
-});
-
-// Generate QR Code and return as Base64 data URL remains unchanged
+// Generate QR Code and return as Base64 data URL (using QRCode library)
 async function generateQRCodeData(url) {
   try {
     const qrDataURL = await QRCode.toDataURL(url, {
@@ -543,15 +520,7 @@ async function generateQRCodeData(url) {
   }
 }
 
-// Auto-download the QR Code
-function downloadQRCode(dataURL, filename) {
-  const link = document.createElement("a");
-  link.href = dataURL;
-  link.download = filename;
-  link.click();
-}
-
-// Fetch user data function using PHP endpoint
+// fetchUserData: Fetch user data from the PHP endpoint
 async function fetchUserData(libraryId) {
   toggleLoading(true);
   try {
@@ -560,7 +529,7 @@ async function fetchUserData(libraryId) {
     if (data.error) {
       showModal(data.error);
     } else {
-      displayUserData(data); // Ensure this function handles all fields
+      displayUserData(data);
     }
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -570,7 +539,7 @@ async function fetchUserData(libraryId) {
   }
 }
 
-// Toggle field visibility based on patron type (unchanged)
+// Toggle field visibility based on patron type
 function toggleFields(patronType) {
   const departmentInput = document.querySelector('.department-input');
   const courseInput = document.querySelector('.course-input');
@@ -581,7 +550,6 @@ function toggleFields(patronType) {
   const campusDeptInput = document.querySelector('.campusdept');
   const collegeInput = document.querySelector('.college');
 
-  // Hide all fields initially
   departmentInput.style.display = 'none';
   courseInput.style.display = 'none';
   majorInput.style.display = 'none';
@@ -591,7 +559,6 @@ function toggleFields(patronType) {
   campusDeptInput.style.display = 'none';
   collegeInput.style.display = 'none';
 
-  // Show fields based on patron type
   switch (patronType) {
     case 'faculty':
       collegeInput.style.display = 'block';
@@ -610,20 +577,17 @@ function toggleFields(patronType) {
   }
 }
 
+// Display user data in the form and a summary section
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
-
-  // Populate dynamic select fields if user data exists
   if (userData.department) {
-    await updateCourses(userData.department); // Fetch courses
+    await updateCourses(userData.department);
     document.getElementById("department-select").value = userData.department || "";
-    await updateCourses(userData.department); // Fetch courses
+    await updateCourses(userData.department);
     document.getElementById("course-select").value = userData.course || "";
-    await updateMajors(userData.course, userData.department); // Fetch majors
+    await updateMajors(userData.course, userData.department);
     document.getElementById("major-select").value = userData.major || "";
   }
-
-  // Populate other fields
   document.getElementById("library-id").value = userData.libraryIdNo || "";
   document.getElementById("valid-until").value = userData.validUntil || "";
   document.querySelector(".patron select").value = userData.patron || "";
@@ -635,8 +599,6 @@ async function displayUserData(userData) {
   document.getElementById("strand-select").value = userData.strand || "";
   document.querySelector(".year-sem-inputs .data-input:nth-child(1) select").value = userData.schoolYear || "";
   document.querySelector(".year-sem-inputs .data-input:nth-child(2) select").value = userData.semester || "";
-
-  // Populate college and campus department if applicable
   if (userData.patron === 'faculty') {
     document.getElementById("college-select").value = userData.collegeSelect || "";
   } else if (userData.patron === 'admin') {
@@ -645,13 +607,11 @@ async function displayUserData(userData) {
     document.getElementById("school-select").value = userData.schoolSelect || "";
     if (userData.schoolSelect === 'other') {
       document.getElementById("specify-school-input").value = userData.specifySchool || "";
-      document.getElementById("specify-school-input").style.display = "block"; // Show the input field
+      document.getElementById("specify-school-input").style.display = "block";
     } else {
-      document.getElementById("specify-school-input").style.display = "none"; // Hide the input field
+      document.getElementById("specify-school-input").style.display = "none";
     }
   }
-
-  // Dynamically display the user data
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
     <p>Type of Patron: ${userData.patron}</p>
@@ -671,8 +631,6 @@ async function displayUserData(userData) {
     ${userData.specifySchool ? `<p>Specify School: ${userData.specifySchool}</p>` : ''}
     ${userData.campusDept ? `<p>Campus Department: ${userData.campusDept}</p>` : ''}
   `;
-
-  // Ensure fields are toggled correctly
   toggleFields(userData.patron);
 }
 
@@ -683,33 +641,28 @@ const tokenParam = urlParams.get('token');
 
 if (libraryIdNoParam && tokenParam) {
   fetchUserData(libraryIdNoParam).then(() => {
-    // Optionally, after fetching, you could validate the token here if needed.
+    // Optionally, validate token if needed.
   }).catch((error) => {
     console.error("Error fetching document:", error);
   });
 }
 
-// Another DOMContentLoaded block for auto-filling (if needed)
-// [This block might be redundant with the earlier one—ensure you adjust as needed]
+// Another auto-fill block (if needed)
 document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdInput = document.getElementById("library-id");
   const validUntilInput = document.getElementById("valid-until");
-
   if (!libraryIdInput || !validUntilInput) {
     console.error("One or more required DOM elements are missing.");
     return;
   }
-
   const urlParams = new URLSearchParams(window.location.search);
   const libraryIdNo = urlParams.get('libraryIdNo');
-
   if (libraryIdNo) {
     try {
       const response = await fetch(`http://192.168.0.21:8080/fetch_user.php?libraryIdNo=${libraryIdNo}`);
       const userData = await response.json();
       if (userData.error) {
         console.error("Error: " + userData.error);
-        alert("User not found.");
       } else {
         libraryIdInput.value = userData.libraryIdNo;
         validUntilInput.value = userData.validUntil || "July 2025";

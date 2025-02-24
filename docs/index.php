@@ -10,6 +10,7 @@
   <title>ZPPSU Library Users Registration Form</title>
 
   <!-- Correct QR Code Generator Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="js/jquery.min.js"></script>
   <script src="js/qrcode.min.js"></script>
 </head>
@@ -31,9 +32,9 @@
         </div>
       </div>
     </div>
-    <form id="userForm" action="insert.php" method="POST">
+    <form id="userForm" onsubmit="return confirmSubmission(event)" action=" insert.php" method="POST">
       <div class="data-input patron">
-        <p>Type of Patron</p>
+        <p>Type of Patron<span>*</span></p>
         <select required>
           <option value="" disabled selected class="select-option">Select Type of Patron</option>
           <option value="student">Student</option>
@@ -45,11 +46,11 @@
 
       <div class="name-inputs">
         <div class="data-input">
-          <p>Last Name</p>
+          <p>Last Name<span>*</span></p>
           <input type="text" required />
         </div>
         <div class="data-input">
-          <p>First Name</p>
+          <p>First Name<span>*</span></p>
           <input type="text" required />
         </div>
         <div class="data-input middle-initial">
@@ -57,7 +58,7 @@
           <input type="text" />
         </div>
         <div class="data-input gender">
-          <p>Gender</p>
+          <p>Gender<span>*</span></p>
           <select required>
             <option value="" disabled selected class="select-option">Select</option>
             <option value="male">Male</option>
@@ -68,7 +69,7 @@
 
       <div class="course-year-inputs">
         <div class="data-input department-input">
-          <p>Department</p>
+          <p>Department<span>*</span></p>
           <select id="department-select" required>
             <option value="" disabled selected class="select-option">Select Department</option>
             <option value="cics">College of Information in Computing Sciences (CICS)</option>
@@ -84,20 +85,20 @@
           </select>
         </div>
         <div class="data-input course-input">
-          <p>Course</p>
+          <p>Course<span>*</span></p>
           <select id="course-select" required>
             <option value="" disabled selected>Select Course</option>
           </select>
         </div>
         <div class="data-input major-input">
-          <p>Major</p>
+          <p>Major<span>*</span></p>
           <select id="major-select" required>
             <option value="" disabled selected>Select Major</option>
           </select>
         </div>
 
         <div class="data-input strand-input" style="display: none">
-          <p>Strand</p>
+          <p>Strand<span>*</span></p>
           <select id="strand-select" required>
             <option value="" disabled selected>Select Strand</option>
             <option value="GAS">GAS</option>
@@ -107,7 +108,7 @@
         </div>
 
         <div class="data-input grade-input" style="display: none">
-          <p>Grade</p>
+          <p>Grade<span>*</span></p>
           <select id="grade-select" required>
             <option value="" disabled selected>Select Grade</option>
             <option value="Grade 11">Grade 11</option>
@@ -116,7 +117,7 @@
         </div>
 
         <div class="data-input school" style="display: none">
-          <p>School</p>
+          <p>School<span>*</span></p>
           <select id="school-select" required>
             <option value="" disabled selected>Select School</option>
             <option value="wmsu">Western Mindanao State University</option>
@@ -128,7 +129,7 @@
         </div>
 
         <div class="data-input campusdept" style="display: none">
-          <p>Office</p>
+          <p>Office<span>*</span></p>
           <select id="campusdept-select" required>
             <option value="" disabled selected>Select Office</option>
             <option value="University Registrar">University Registrar</option>
@@ -141,7 +142,7 @@
         </div>
 
         <div class="data-input college" style="display: none">
-          <p>College/Department</p>
+          <p>College/Department<span>*</span></p>
           <select id="college-select" required>
             <option value="" disabled selected class="select-option">Select College/Department</option>
             <option value="cics">College of Information in Computing Sciences (CICS)</option>
@@ -160,7 +161,7 @@
 
       <div class="year-sem-inputs">
         <div class="data-input">
-          <p>School Year</p>
+          <p>School Year<span>*</span></p>
           <select id="year-select" required>
             <option value="" disabled selected class="select-option">Select S.Y.</option>
             <option value="2024-2025">2024 - 2025</option>
@@ -170,7 +171,7 @@
           </select>
         </div>
         <div class="data-input">
-          <p>Semester</p>
+          <p>Semester<span>*</span></p>
           <select id="semester-select" required>
             <option value="" disabled selected class="select-option">Select Sem</option>
             <option value="first-semester">First Semester</option>
@@ -201,7 +202,7 @@
 
     <script src="js/qrcode.min.js"></script>
     <script type="module" src="index.js" defer></script>
-    <!-- <script type="module" src="fiveserver.config.js"></script> -->
+    <script src="lidc.js" defer></script>
 </body>
 
 </html>
