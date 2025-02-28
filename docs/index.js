@@ -493,7 +493,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     } else {
       if (!result.exists) {
         // Download the full ID card (with user info and QR code) instead of just the QR code
-        downloadIdCard(userData);
+        generateIdCard(userData);
       }
       showModal(result.success || result.message);
     }
