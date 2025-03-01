@@ -14,13 +14,31 @@ function generateIdCard(userData) {
   `;
 
   const leftSection = document.createElement('div');
-  leftSection.style.width = '75%';
-  leftSection.style.padding = '14px';
+  leftSection.style.cssText = `
+    width: 75%;
+    padding: 14px;
+    position: relative;
+  `;
+
+  // 🔹 Use <img> instead of background-image for sharper rendering
+  const bgImage = new Image();
+  bgImage.src = "assets/bg.jpg";
+  bgImage.style.cssText = `
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    object-fit: cover; /* Ensures it scales properly */
+    image-rendering: pixelated; /* Helps prevent blur */
+  `;
+  leftSection.appendChild(bgImage);
 
   let additionalInfo = "";
 
   if (userData.patron === "student") {
-    if (userData.collegeSelect) {
+    if (userData.course) {
       additionalInfo = `
         <p><strong>Department:</strong> ${userData.department.toUpperCase()}</p>
         <p><strong>Course:</strong> ${convertToAcronym(userData.course)}</p>
@@ -36,12 +54,12 @@ function generateIdCard(userData) {
   } else if (userData.patron === "faculty") {
     additionalInfo = `<p><strong>Department:</strong> ${userData.collegeSelect.toUpperCase()}</p>`;
   } else if (userData.patron === "admin") {
-    additionalInfo = `<p><strong>Office:</strong> ${userData.campusDept.toUpperCase()}</p>`;
+    additionalInfo = `<p><strong>Office:</strong> ${userData.campusDept}</p>`;
   } else if (userData.patron === "visitor") {
-    additionalInfo = `<p><strong>School:</strong> ${userData.schoolSelect.toUpperCase() || userData.specifySchool.toUpperCase()}</p>`;
+    additionalInfo = `<p><strong>School:</strong> ${convertToSynonym(userData.schoolSelect) || userData.specifySchool.toUpperCase()}</p>`;
   }
 
-  leftSection.innerHTML = `
+  leftSection.innerHTML += `
     <p style="font-size: 13px; text-align: center; font-weight: bold; color: #8B0000; text-transform: uppercase;">
       Zamboanga Peninsula Polytechnic State University
     </p>
@@ -74,6 +92,15 @@ function generateIdCard(userData) {
       "Bachelor of Science in Civil Engineering": "BSCE",
     };
     return acronyms[course] || course;
+  }
+
+  function convertToSynonym(schoolSelect) {
+    const synonyms = {
+      "uz": "Universidad de Zamboanga",
+      "wmsu": "Western Mindanao State University",
+      "zscmst": "Zamboanga State College of Marine Sciences and Technology",
+    };
+    return synonyms[schoolSelect] || schoolSelect;
   }
 
   function formatSemester(semester) {
@@ -129,20 +156,22 @@ function generateIdCard(userData) {
   idCard.style.top = '-10000px';
   document.body.appendChild(idCard);
 
-  // Increase the scaling factor for high resolution (DPI)
-  const scaleFactor = 4;
+  // 🔹 Increase scaleFactor for higher resolution
+  const scaleFactor = 5;
 
-  html2canvas(idCard, {
-    backgroundColor: null,
-    scale: scaleFactor,
-    useCORS: true
-  }).then(canvas => {
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL("image/png", 1.0);
-    link.download = `${userData.libraryIdNo}_id_card.png`;
-    link.click();
-    document.body.removeChild(idCard);
-  }).catch(err => {
-    console.error("Error generating high-quality ID card image:", err);
-  });
+  bgImage.onload = function () {
+    html2canvas(idCard, {
+      backgroundColor: null,
+      scale: scaleFactor,
+      useCORS: true
+    }).then(canvas => {
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL("image/png", 1.0);
+      link.download = `${userData.libraryIdNo}_id_card.png`;
+      link.click();
+      document.body.removeChild(idCard);
+    }).catch(err => {
+      console.error("Error generating high-quality ID card image:", err);
+    });
+  };
 }

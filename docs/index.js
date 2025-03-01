@@ -541,6 +541,7 @@ async function fetchUserData(libraryId) {
 
 // Toggle field visibility based on patron type
 function toggleFields(patronType) {
+  const selectedDepartment = departmentSelect.value;
   const departmentInput = document.querySelector('.department-input');
   const courseInput = document.querySelector('.course-input');
   const majorInput = document.querySelector('.major-input');
@@ -550,6 +551,7 @@ function toggleFields(patronType) {
   const campusDeptInput = document.querySelector('.campusdept');
   const collegeInput = document.querySelector('.college');
 
+  // Hide all inputs initially
   departmentInput.style.display = 'none';
   courseInput.style.display = 'none';
   majorInput.style.display = 'none';
@@ -559,23 +561,26 @@ function toggleFields(patronType) {
   campusDeptInput.style.display = 'none';
   collegeInput.style.display = 'none';
 
-  switch (patronType) {
-    case 'faculty':
-      collegeInput.style.display = 'block';
-      break;
-    case 'admin':
-      campusDeptInput.style.display = 'block';
-      break;
-    case 'visitor':
-      schoolSelect.style.display = 'block';
-      break;
-    default:
-      departmentInput.style.display = 'block';
+  if (patronType === "faculty") {
+    collegeInput.style.display = 'block';
+  } else if (patronType === "admin") {
+    campusDeptInput.style.display = 'block';
+  } else if (patronType === "visitor") {
+    schoolSelect.style.display = 'block';
+  } else if (patronType === "student") {
+    departmentInput.style.display = 'block';
+
+    if (selectedDepartment === "shs") {  // ✅ If department is SHS, show only strand & grade
+      strandInput.style.display = 'block';
+      gradeInput.style.display = 'block';
+    } else {  // ✅ If department is college, show course & major
       courseInput.style.display = 'block';
       majorInput.style.display = 'block';
-      break;
+    }
   }
 }
+
+
 
 // Display user data in the form and a summary section
 async function displayUserData(userData) {
