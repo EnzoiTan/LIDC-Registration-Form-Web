@@ -542,7 +542,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
       generateIdCard(userData);
       showModal(result.success || result.message, "success"); // Explicitly set type to 'success'
     } else {
-      showModal(result.message, result.alertType || "info"); // ✅ Use the correct alertType from the backend
+      showModal(result.message, "info"); // Default to 'info' for other cases
     }
   } catch (error) {
     console.error("Error storing data:", error);

@@ -119,12 +119,12 @@ if ($checkStmt->num_rows > 0) {
             "exists" => true,
             "timesEntered" => $newTimesEntered,
             "message" => "Good day, $lastName! Your entry has been recorded.", // Use a standard key
-            "alertType" => 'success'
+            "alertType" => "success" // ✅ Ensure alertType is always present
         ]);
     } else {
         echo json_encode([
             "message" => "Failed to update user: " . $updateStmt->error,
-            "alertType" => 'error'
+            "alertType" => "error"
         ]);
     }
 
