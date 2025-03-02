@@ -173,7 +173,7 @@ $stmt->bind_param(
 
 if ($stmt->execute()) {
     echo json_encode([
-        "success" => "Your data has been saved successfully!",
+        "success" => "Your data has been saved successfully!<br><span class='small-note'><b>Note:</b> Your ID card with QR code has been downloaded. Scan your QR code every time you enter the library to record your attendance.</span>",
         "exists" => false,
         "timesEntered" => 1,
         "alertType" => "success"
@@ -184,6 +184,7 @@ if ($stmt->execute()) {
         "alertType" => "error"
     ]);
 }
+
 
 $stmt->close();
 $conn->close();

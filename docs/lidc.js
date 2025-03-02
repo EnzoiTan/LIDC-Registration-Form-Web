@@ -37,6 +37,8 @@ function generateIdCard(userData) {
 
   let additionalInfo = "";
 
+  const departmentSynonym = convertToFullName(userData.collegeSelect.toLowerCase());
+
   if (userData.patron === "student") {
     if (userData.course) {
       additionalInfo = `
@@ -52,7 +54,7 @@ function generateIdCard(userData) {
       `;
     }
   } else if (userData.patron === "faculty") {
-    additionalInfo = `<p><strong>Department:</strong> ${userData.collegeSelect.toUpperCase()}</p>`;
+    additionalInfo = `<p><strong>Department:</strong> ${departmentSynonym}</p>`;
   } else if (userData.patron === "admin") {
     additionalInfo = `<p><strong>Office:</strong> ${userData.campusDept}</p>`;
   } else if (userData.patron === "visitor") {
@@ -97,6 +99,23 @@ function generateIdCard(userData) {
       "Bachelor of Science in Civil Engineering": "BSCE",
     };
     return acronyms[course] || course;
+  }
+
+  function convertToFullName(acronym) {
+    const acronymToFullName = {
+      "cics": "College of Information in Computing Sciences",
+      "cte": "College of Teacher Education",
+      "cet": "College of Engineering and Technology",
+      "cahss": "College of Arts, Humanities and Social Sciences",
+      "sba": "School of Business Administration",
+      "cme": "College of Marine Education",
+      "cpes": "College of Physical Education and Sport",
+      "ite": "Institute of Technical Education",
+      "shs": "Senior High School",
+      "gs": "Graduate School"
+    };
+
+    return acronymToFullName[acronym.toLowerCase()] || acronym; // Convert input to lowercase before lookup
   }
 
   function convertToSynonym(schoolSelect) {

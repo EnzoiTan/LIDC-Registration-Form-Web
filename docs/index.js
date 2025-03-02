@@ -93,6 +93,16 @@ style.innerHTML = `
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+
+  .small-note {
+  font-size: 12px; /* Make text smaller */
+  font-family: ariel, sans-serif;
+  color: #666; /* Use a slightly faded color */
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
 `;
 document.head.appendChild(style);
 
@@ -149,8 +159,29 @@ function showModal(message, type) {
 
   modal.querySelector(".modal-button").addEventListener("click", () => {
     modal.remove();
+
+    // ✅ Refresh page after modal is closed
+    // ✅ Remove auto-refresh after 3 seconds
+    if (type === "success") {
+      modal.querySelector(".modal-button").addEventListener("click", () => {
+        modal.remove();
+        location.reload();
+      });
+    }
+
   });
+
+  // ✅ Auto-close and refresh after 3 seconds for success modals
+  // ✅ Remove auto-refresh after 3 seconds
+  if (type === "success") {
+    modal.querySelector(".modal-button").addEventListener("click", () => {
+      modal.remove();
+      location.reload();
+    });
+  }
+
 }
+
 
 
 // Create the loading overlay
@@ -589,51 +620,61 @@ async function fetchUserData(libraryId) {
 }
 
 function toggleFields(patronType) {
-  const departmentSelect = document.querySelector('.department-select'); // Ensure this exists
-  const selectedDepartment = departmentSelect ? departmentSelect.value : "";
+  const departmentSelect = document.getElementById("department-select");
+  if (!departmentSelect) {
+    console.error("Error: department-select not found.");
+    return;
+  }
 
-  const departmentInput = document.querySelector('.department-input');
-  const courseInput = document.querySelector('.course-input');
-  const majorInput = document.querySelector('.major-input');
-  const strandInput = document.querySelector('.strand-input');
-  const gradeInput = document.querySelector('.grade-input');
-  const schoolSelect = document.querySelector('.school');
-  const campusDeptInput = document.querySelector('.campusdept');
-  const collegeInput = document.querySelector('.college');
+  const departmentInput = document.querySelector(".department-input");
+  const courseInput = document.querySelector(".course-input");
+  const majorInput = document.querySelector(".major-input");
+  const strandInput = document.querySelector(".strand-input");
+  const gradeInput = document.querySelector(".grade-input");
+  const schoolSelectWrapper = document.querySelector(".school");
+  const schoolSelect = document.getElementById("school-select");
+  const campusDeptInput = document.querySelector(".campusdept");
+  const collegeInput = document.querySelector(".college");
 
-  // Hide all inputs initially
-  departmentInput.style.display = 'none';
-  courseInput.style.display = 'none';
-  majorInput.style.display = 'none';
-  strandInput.style.display = 'none';
-  gradeInput.style.display = 'none';
-  schoolSelect.style.display = 'none';
-  campusDeptInput.style.display = 'none';
-  collegeInput.style.display = 'none';
+  // ✅ Check if elements exist before modifying
+  if (departmentInput) departmentInput.style.display = "none";
+  if (courseInput) courseInput.style.display = "none";
+  if (majorInput) majorInput.style.display = "none";
+  if (strandInput) strandInput.style.display = "none";
+  if (gradeInput) gradeInput.style.display = "none";
+  if (schoolSelectWrapper) schoolSelectWrapper.style.display = "none";
+  if (campusDeptInput) campusDeptInput.style.display = "none";
+  if (collegeInput) collegeInput.style.display = "none";
 
-  if (patronType === "faculty") {
-    collegeInput.style.display = 'block';
-  } else if (patronType === "admin") {
-    campusDeptInput.style.display = 'block';
-  } else if (patronType === "visitor") {
-    schoolSelect.style.display = 'block';
+  // ✅ Prevent errors when accessing undefined elements
+  if (!schoolSelect) {
+    console.error("Error: school-select not found.");
+    return;
+  }
+
+  if (patronType === "faculty" && collegeInput) {
+    collegeInput.style.display = "block";
+  } else if (patronType === "admin" && campusDeptInput) {
+    campusDeptInput.style.display = "block";
+  } else if (patronType === "visitor" && schoolSelectWrapper) {
+    schoolSelectWrapper.style.display = "block";
   } else if (patronType === "student") {
-    departmentInput.style.display = 'block';
+    if (departmentInput) departmentInput.style.display = "block";
 
-    if (selectedDepartment === "shs") {  // ✅ If department is SHS, show only strand & grade
-      strandInput.style.display = 'block';
-      gradeInput.style.display = 'block';
-    } else {  // ✅ If department is college, show course & major
-      courseInput.style.display = 'block';
-      majorInput.style.display = 'block';
+    if (departmentSelect.value === "shs") {
+      if (strandInput) strandInput.style.display = "block";
+      if (gradeInput) gradeInput.style.display = "block";
+    } else {
+      if (courseInput) courseInput.style.display = "block";
+      if (majorInput) majorInput.style.display = "block";
     }
   } else {
-    // ✅ Default case: Show department, course, and major if patronType doesn't match known values
     departmentInput.style.display = 'block';
     courseInput.style.display = 'block';
     majorInput.style.display = 'block';
   }
 }
+
 
 
 // Display user data in the form and a summary section
@@ -658,6 +699,7 @@ async function displayUserData(userData) {
   document.getElementById("strand-select").value = userData.strand || "";
   document.querySelector(".year-sem-inputs .data-input:nth-child(1) select").value = userData.schoolYear || "";
   document.querySelector(".year-sem-inputs .data-input:nth-child(2) select").value = userData.semester || "";
+
   if (userData.patron === 'faculty') {
     document.getElementById("college-select").value = userData.collegeSelect || "";
   } else if (userData.patron === 'admin') {
