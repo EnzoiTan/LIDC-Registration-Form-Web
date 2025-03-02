@@ -118,7 +118,7 @@ if ($checkStmt->num_rows > 0) {
         echo json_encode([
             "exists" => true,
             "timesEntered" => $newTimesEntered,
-            "message" => "Good day, $lastName! Your entry has been recorded.", // Use a standard key
+            "message" => "Good day, $firstName $lastName! Your entry has been recorded.", // Use a standard key
             "alertType" => 'success'
         ]);
     } else {

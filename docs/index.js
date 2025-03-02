@@ -675,8 +675,6 @@ function toggleFields(patronType) {
   }
 }
 
-
-
 // Display user data in the form and a summary section
 async function displayUserData(userData) {
   const userDataDiv = document.getElementById("user-data");
