@@ -1,4 +1,9 @@
-/* Remove Firebase imports – we no longer use Firebase */
+const ALERT_TYPES = {
+  SUCCESS: 'success',
+  ERROR: 'error',
+  CONFIRMATION: 'confirmation',
+  WARNING: 'warning'
+};
 
 // Inject CSS for modal, loading spinner, and other styles
 const style = document.createElement('style');
@@ -35,11 +40,7 @@ style.innerHTML = `
   p {
     padding: 0;
   }
-  /* Error Icon */
-  .modal-content.error .modal-icon::before {
-    content: '❌';
-    color: #dc3545;
-  }
+
   /* Message Text */
   .modal-content p {
     font-size: 16px;
@@ -49,7 +50,7 @@ style.innerHTML = `
   }
   /* OK Button */
   .modal-button {
-    background: #007bff;
+    background:rgb(147, 147, 147);
     color: white;
     border: none;
     padding: 8px 30px;
@@ -60,7 +61,7 @@ style.innerHTML = `
     transition: background 0.3s;
   }
   .modal-button:hover {
-    background: #0056b3;
+    background:rgb(33, 33, 33);
   }
   /* Fade-in Animation */
   @keyframes fadeIn {
@@ -95,22 +96,62 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
-// Modal function – displays a modal with a message and an "Okay" button
-function showModal(message, isSuccess = true) {
+function showModal(message, type) {
   const modal = document.createElement("div");
   modal.classList.add("custom-modal");
+
+  // Ensure type is provided; otherwise, use 'info' as default
+  if (!type) {
+    type = 'info';  // Default to 'info' if no type is passed
+  }
+
+  // Determine modal properties based on type
+  let iconSrc = '';
+  let modalClass = '';
+  let imgSize = '50px';
+
+  switch (type) {
+    case 'success':
+      iconSrc = 'assets/success.png';
+      modalClass = 'success';
+      imgSize = '100px';
+      break;
+    case 'error':
+      iconSrc = 'assets/error.png';
+      modalClass = 'error';
+      imgSize = '100px';
+      break;
+    case 'confirmation':
+      iconSrc = 'assets/confirmation.jpg';
+      modalClass = 'confirmation';
+      imgSize = '100px';
+      break;
+    case 'warning':
+      iconSrc = 'assets/warning.png';
+      modalClass = 'warning';
+      imgSize = '70px';
+      break;
+  }
+
   modal.innerHTML = `
-    <div class="modal-content ${isSuccess ? '' : 'error'}">
-      <div class="modal-icon"></div>
+    <div class="modal-content ${modalClass}">
+      <div class="modal-icon">
+        <img src="${iconSrc}" alt="${type} icon" style="width: ${imgSize}; max-height: 120px; display: block; margin: 0 auto;" />
+      </div>
       <p class="message">${message.replace(/\n/g, "<br>")}</p>
-      <button class="modal-button">Okay</button>
+      <div class="modal-button-container">
+        <button class="modal-button">Okay</button>
+      </div>
     </div>
   `;
+
   document.body.appendChild(modal);
+
   modal.querySelector(".modal-button").addEventListener("click", () => {
     modal.remove();
   });
 }
+
 
 // Create the loading overlay
 const loadingOverlay = document.createElement('div');
@@ -429,6 +470,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
   const submitButton = document.querySelector(".submit");
   submitButton.disabled = true;
   toggleLoading(true);
+
   try {
     // Collect form data
     const libraryIdInput = document.getElementById("library-id");
@@ -455,6 +497,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     const qrCodeURL = `http://192.168.0.21:8080/?libraryIdNo=${libraryIdNo}&token=${token}`;
     const qrCodeImage = await generateQRCodeData(qrCodeURL);
     const name = `${lastName}, ${firstName} ${middleInitial}.`.trim();
+
     const userData = {
       libraryIdNo,
       validUntil,
@@ -487,15 +530,19 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData)
     });
+
     const result = await response.json();
+
     if (result.error) {
-      showModal(result.error);
+      showModal(result.error, "error"); // Explicitly set type to 'error'
+    } else if (result.alertType === "confirmation") {
+      showModal(result.message, "confirmation"); // Explicitly set type to 'confirmation'
+    } else if (!result.exists) {
+      // ✅ Download ID Card ONLY when data is successfully saved
+      generateIdCard(userData);
+      showModal(result.success || result.message, "success"); // Explicitly set type to 'success'
     } else {
-      if (!result.exists) {
-        // Download the full ID card (with user info and QR code) instead of just the QR code
-        generateIdCard(userData);
-      }
-      showModal(result.success || result.message);
+      showModal(result.message, "info"); // Default to 'info' for other cases
     }
   } catch (error) {
     console.error("Error storing data:", error);
@@ -505,6 +552,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     submitButton.disabled = false;
   }
 });
+
 
 // Generate QR Code and return as Base64 data URL (using QRCode library)
 async function generateQRCodeData(url) {
@@ -527,7 +575,8 @@ async function fetchUserData(libraryId) {
     const response = await fetch(`http://192.168.0.21:8080/fetch_user.php?libraryIdNo=${libraryId}`);
     const data = await response.json();
     if (data.error) {
-      showModal(data.error);
+      // Show modal with error message
+      showModal(data.error, data.alertType); // Pass the alertType
     } else {
       displayUserData(data);
     }
@@ -539,9 +588,10 @@ async function fetchUserData(libraryId) {
   }
 }
 
-// Toggle field visibility based on patron type
 function toggleFields(patronType) {
-  const selectedDepartment = departmentSelect.value;
+  const departmentSelect = document.querySelector('.department-select'); // Ensure this exists
+  const selectedDepartment = departmentSelect ? departmentSelect.value : "";
+
   const departmentInput = document.querySelector('.department-input');
   const courseInput = document.querySelector('.course-input');
   const majorInput = document.querySelector('.major-input');
@@ -577,9 +627,13 @@ function toggleFields(patronType) {
       courseInput.style.display = 'block';
       majorInput.style.display = 'block';
     }
+  } else {
+    // ✅ Default case: Show department, course, and major if patronType doesn't match known values
+    departmentInput.style.display = 'block';
+    courseInput.style.display = 'block';
+    majorInput.style.display = 'block';
   }
 }
-
 
 
 // Display user data in the form and a summary section

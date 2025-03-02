@@ -22,6 +22,44 @@ if (!$data) {
     exit();
 }
 
+// Define required fields for each patron type
+$requiredFields = [
+    'student' => ['libraryIdNo', 'firstName', 'lastName', 'gender', 'department', 'schoolYear', 'semester'],
+    'faculty' => ['libraryIdNo', 'firstName', 'lastName', 'gender', 'collegeSelect', 'schoolYear', 'semester'],
+    'admin' => ['libraryIdNo', 'firstName', 'lastName', 'gender', 'campusDept', 'schoolYear', 'semester'],
+    'visitor' => ['libraryIdNo', 'firstName', 'lastName', 'gender', 'schoolYear', 'semester'],
+];
+
+// Ensure SHS students require 'grade' and 'strand', while college students require 'course' and 'major'
+$department = strtolower($data['department'] ?? '');
+if ($department === "shs") {
+    $requiredFields['student'][] = 'grade';
+    $requiredFields['student'][] = 'strand';
+} else {
+    $requiredFields['student'][] = 'course';
+    $requiredFields['student'][] = 'major';
+}
+
+// Validate patron type
+if (!isset($requiredFields[$data['patron']])) {
+    echo json_encode([
+        'message' => "Please fill out all required fields!",
+        "alertType" => 'confirmation'
+    ]);
+    exit();
+}
+
+// Validate required fields for the selected patron type
+foreach ($requiredFields[$data['patron']] as $field) {
+    if (!isset($data[$field]) || trim($data[$field]) === '') {
+        echo json_encode([
+            'message' => "Please fill out all required fields!",
+            "alertType" => 'confirmation'
+        ]);
+        exit();
+    }
+}
+
 // Extract user data
 $libraryIdNo   = $data['libraryIdNo'] ?? '';
 $validUntil    = $data['validUntil'] ?? '';
@@ -46,7 +84,7 @@ $collegeSelect = $data['collegeSelect'] ?? '';
 $schoolSelect  = $data['schoolSelect'] ?? '';
 $specifySchool = ($schoolSelect === 'other') ? $data['specifySchool'] ?? '' : '';
 $campusDept    = $data['campusDept'] ?? '';
-$name          = trim("$lastName, $firstName $middleInitial.");
+$name = trim("$lastName, $firstName" . (!empty($middleInitial) ? " $middleInitial" : "")) . (!empty($middleInitial) ? "." : "");
 
 // ✅ Check if user already exists
 $checkSql = "SELECT timesEntered, timestamps FROM std_details WHERE libraryIdNo = ?";
@@ -79,13 +117,17 @@ if ($checkStmt->num_rows > 0) {
     if ($updateStmt->execute()) {
         echo json_encode([
             "exists" => true,
-            "message" => "✅ Good day, $lastName! Your entry has been recorded.",
             "timesEntered" => $newTimesEntered,
-            "alertType" => "success"
+            "message" => "Good day, $lastName! Your entry has been recorded.", // Use a standard key
+            "alertType" => "success" // ✅ Ensure alertType is always present
         ]);
     } else {
-        echo json_encode(["error" => "❌ Failed to update user: " . $updateStmt->error, "alertType" => "error"]);
+        echo json_encode([
+            "message" => "Failed to update user: " . $updateStmt->error,
+            "alertType" => "error"
+        ]);
     }
+
 
     $updateStmt->close();
     $conn->close();
@@ -131,13 +173,16 @@ $stmt->bind_param(
 
 if ($stmt->execute()) {
     echo json_encode([
-        "success" => "✅ User saved successfully!",
+        "success" => "Your data has been saved successfully!",
         "exists" => false,
         "timesEntered" => 1,
         "alertType" => "success"
     ]);
 } else {
-    echo json_encode(["error" => "❌ Failed to save user: " . $stmt->error, "alertType" => "error"]);
+    echo json_encode([
+        "error" => "Failed to save user",
+        "alertType" => "error"
+    ]);
 }
 
 $stmt->close();

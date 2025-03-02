@@ -56,8 +56,13 @@ function generateIdCard(userData) {
   } else if (userData.patron === "admin") {
     additionalInfo = `<p><strong>Office:</strong> ${userData.campusDept}</p>`;
   } else if (userData.patron === "visitor") {
-    additionalInfo = `<p><strong>School:</strong> ${convertToSynonym(userData.schoolSelect) || userData.specifySchool.toUpperCase()}</p>`;
+    let schoolName = userData.schoolSelect.toLowerCase() === "other"
+      ? userData.specifySchool.toUpperCase()
+      : convertToSynonym(userData.schoolSelect);
+
+    additionalInfo = `<p><strong>School:</strong> ${schoolName}</p>`;
   }
+
 
   leftSection.innerHTML += `
     <p style="font-size: 13px; text-align: center; font-weight: bold; color: #8B0000; text-transform: uppercase;">
@@ -71,7 +76,7 @@ function generateIdCard(userData) {
     <div style="display: flex; align-items: center; font-family: 'Poppins', sans-serif;">
       <div style="width: 125px; height: 125px; background-color: #ccc; margin-right: 10px; flex-shrink: 0; min-width: 125px; min-height: 125px;"></div>
       <div>
-        <p><strong>Name:</strong> ${userData.lastName}, ${userData.firstName} ${userData.middleInitial || ''}.</p>
+        <p><strong>Name:</strong> ${userData.lastName}, ${userData.firstName}${userData.middleInitial ? ' ' + userData.middleInitial + '.' : ''}</p>
         ${additionalInfo}
         <p><strong>Semester:</strong> ${formatSemester(userData.semester)}</p>
       </div>

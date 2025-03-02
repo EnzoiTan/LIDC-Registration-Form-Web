@@ -118,12 +118,12 @@
 
         <div class="data-input school" style="display: none">
           <p>School<span>*</span></p>
-          <select id="school-select" required>
+          <select id="school-select">
             <option value="" disabled selected>Select School</option>
             <option value="wmsu">Western Mindanao State University</option>
             <option value="zscmst">Zamboanga State College of Marine Sciences and Technology</option>
             <option value="uz">Universidad de Zamboanga</option>
-            <option value="other">Other</option>
+            <option value="other">Other</option> <!-- ✅ Fixed "Other" option -->
           </select>
           <input type="text" id="specify-school-input" style="display: none; margin-top: 10px" placeholder="Specify School" />
         </div>
