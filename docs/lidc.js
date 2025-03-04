@@ -90,14 +90,39 @@ function generateIdCard(userData) {
 
   function convertToAcronym(course) {
     const acronyms = {
-      "BS Information Technology": "BSIT",
-      "Bachelor of Science in Computer Science": "BSCS",
+      "BS Information Technology": "BSInfoTech",
       "BS Information System": "BSIS",
+      "Bachelor of Science in Computer Science": "BSCS",
       "Bachelor of Science in Electronics Engineering": "BSECE",
       "Bachelor of Science in Electrical Engineering": "BSEE",
       "Bachelor of Science in Mechanical Engineering": "BSME",
       "Bachelor of Science in Civil Engineering": "BSCE",
+      "BS Industrial Technology": "BSIndTech",
+      "BS Automotive Technology": "BSAT",
+      "BS Electrical Technology": "BSET",
+      "BS Electronics Technology": "BSElexT",
+      "BS Mechanical Technology": "BSMT",
+      "BS Refrigeration and Air Conditioning Technology": "BSRACT",
+      "BS Computer Technology": "BSCompTech",
+      "Bachelor of Industrial Technology": "BSIT",
+      "BS Development Communication": "BSDevCom",
+      "Bachelor of Fine Arts": "BFA",
+      "Batsilyer sa Sining ng Filipino (BATSIFIL)": "BATSIFIL",
+      "BS Entrepreneurship": "BSEntrep",
+      "BS Hospitality Management": "BSHM",
+      "BS Marine Engineering": "BSMarE",
+      "Bachelor of Physical Education": "BPED",
+      "BS Exercise and Sports Sciences": "BSESS",
+      "Bachelor of Elementary Education": "BEED",
+      "Bachelor of Technology and Livelihood Education": "BTLED",
+      "Bachelor of Secondary Education": "BSED",
+      "Bachelor of Technical Vocational Teacher Education": "BTVTED",
+      "Professional Education Certificate": "PEC",
+      "Diploma of Technology": "DT",
+      "3-Year Trade Industrial Technical Education": "TITE",
+      "Associate in Industrial Technology": "AIT",
     };
+
     return acronyms[course] || course;
   }
 
@@ -183,19 +208,30 @@ function generateIdCard(userData) {
   // 🔹 Increase scaleFactor for higher resolution
   const scaleFactor = 5;
 
+  function downloadIDCard(dataURL, filename) {
+    const link = document.createElement("a");
+    link.href = dataURL;
+    link.download = filename;
+    link.click();
+  }
+
   bgImage.onload = function () {
     html2canvas(idCard, {
       backgroundColor: null,
       scale: scaleFactor,
       useCORS: true
-    }).then(canvas => {
-      const link = document.createElement('a');
-      link.href = canvas.toDataURL("image/png", 1.0);
-      link.download = `${userData.libraryIdNo}_id_card.png`;
-      link.click();
-      document.body.removeChild(idCard);
-    }).catch(err => {
-      console.error("Error generating high-quality ID card image:", err);
-    });
+    })
+      .then(canvas => {
+        const idCardDataURL = canvas.toDataURL("image/png", 1.0);
+
+        // Auto-download the ID card
+        downloadIDCard(idCardDataURL, `${userData.libraryIdNo}_id_card.png`);
+
+        // Clean up the ID card element after download
+        document.body.removeChild(idCard);
+      })
+      .catch(err => {
+        console.error("Error generating high-quality ID card image:", err);
+      });
   };
 }

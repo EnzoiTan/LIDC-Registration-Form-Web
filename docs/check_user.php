@@ -1,5 +1,5 @@
 <?php
-// Example PHP code to check if user exists
+// Code to check if user exists
 $libraryIdNo = $_GET['libraryIdNo'];
 $token = $_GET['token'];
 

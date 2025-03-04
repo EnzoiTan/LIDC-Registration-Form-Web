@@ -9,8 +9,7 @@
 
   <title>ZPPSU Library Users Registration Form</title>
 
-  <!-- Correct QR Code Generator Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="js/html2canvas.min.js"></script>
   <script src="js/jquery.min.js"></script>
   <script src="js/qrcode.min.js"></script>
 </head>
@@ -123,7 +122,7 @@
             <option value="wmsu">Western Mindanao State University</option>
             <option value="zscmst">Zamboanga State College of Marine Sciences and Technology</option>
             <option value="uz">Universidad de Zamboanga</option>
-            <option value="other">Other</option> <!-- ✅ Fixed "Other" option -->
+            <option value="other">Other</option>
           </select>
           <input type="text" id="specify-school-input" style="display: none; margin-top: 10px" placeholder="Specify School" />
         </div>
@@ -182,13 +181,13 @@
 
       <div class="generate-data">
         <div class="data-input">
-          <p>ID Number</p>
+          <p>ID Number <span class="auto-gen">(Auto-filled by System)</span></p>
           <div class="input-wrapper">
             <input type="text" id="library-id" readonly required />
           </div>
         </div>
         <div class="data-input">
-          <p>Valid Until</p>
+          <p>Valid Until <span class="auto-gen">(Auto-filled by System)</span></p>
           <div class="input-wrapper">
             <input type="text" id="valid-until" readonly required />
           </div>
@@ -198,7 +197,6 @@
       <div id="user-data" style="display: none"></div>
       <button type="submit" class="submit">Submit</button>
     </form>
-
 
     <script src="js/qrcode.min.js"></script>
     <script type="module" src="index.js" defer></script>

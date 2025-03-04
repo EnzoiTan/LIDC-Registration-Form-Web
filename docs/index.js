@@ -5,7 +5,6 @@ const ALERT_TYPES = {
   WARNING: 'warning'
 };
 
-// Inject CSS for modal, loading spinner, and other styles
 const style = document.createElement('style');
 style.innerHTML = `
   /* Modal Background */
@@ -21,6 +20,10 @@ style.innerHTML = `
     align-items: center;
     z-index: 1000;
   }
+  .auto-gen {
+  font-weight: bold;
+  font-size: 13px;
+}
   /* Modal Content */
   .modal-content {
     background: white;
@@ -40,7 +43,6 @@ style.innerHTML = `
   p {
     padding: 0;
   }
-
   /* Message Text */
   .modal-content p {
     font-size: 16px;
@@ -50,7 +52,7 @@ style.innerHTML = `
   }
   /* OK Button */
   .modal-button {
-    background:rgb(147, 147, 147);
+    background:rgb(33, 33, 33);
     color: white;
     border: none;
     padding: 8px 30px;
@@ -61,7 +63,7 @@ style.innerHTML = `
     transition: background 0.3s;
   }
   .modal-button:hover {
-    background:rgb(33, 33, 33);
+    background:rgb(48, 48, 48);
   }
   /* Fade-in Animation */
   @keyframes fadeIn {
@@ -160,8 +162,6 @@ function showModal(message, type) {
   modal.querySelector(".modal-button").addEventListener("click", () => {
     modal.remove();
 
-    // ✅ Refresh page after modal is closed
-    // ✅ Remove auto-refresh after 3 seconds
     if (type === "success") {
       modal.querySelector(".modal-button").addEventListener("click", () => {
         modal.remove();
@@ -171,8 +171,6 @@ function showModal(message, type) {
 
   });
 
-  // ✅ Auto-close and refresh after 3 seconds for success modals
-  // ✅ Remove auto-refresh after 3 seconds
   if (type === "success") {
     modal.querySelector(".modal-button").addEventListener("click", () => {
       modal.remove();
@@ -182,15 +180,12 @@ function showModal(message, type) {
 
 }
 
-
-
 // Create the loading overlay
 const loadingOverlay = document.createElement('div');
 loadingOverlay.className = 'loading-overlay';
 loadingOverlay.innerHTML = '<div class="loading-spinner"></div>';
 document.body.appendChild(loadingOverlay);
 
-// Department courses (unchanged)
 const departmentCourses = {
   cics: {
     courses: {
@@ -203,7 +198,7 @@ const departmentCourses = {
       "Bachelor of Elementary Education": ["None"],
       "Bachelor of Technology and Livelihood Education": ["Home Economics", "Industrial Arts", "Information Communications Technology (ICT)"],
       "Bachelor of Secondary Education": ["English", "Mathematics"],
-      "Bachelor of Technical Vocational Education": [
+      "Bachelor of Technical Vocational Teacher Education": [
         "Automotive Technology",
         "Civil and Construction Technology",
         "Drafting Technology",
@@ -333,7 +328,7 @@ const collegeInputDiv = document.querySelector(".college-input");
 departmentSelect.addEventListener("change", () => {
   const selectedDepartment = departmentSelect.value;
   updateCourses(selectedDepartment);
-  updateMajors(null); // Clear majors
+  updateMajors(null);
   if (selectedDepartment === "shs") {
     gradeInputDiv.style.display = "block";
     strandInputDiv.style.display = "block";
@@ -544,7 +539,7 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
       strand: department === "shs" ? strand : "",
       schoolYear,
       semester,
-      timesEntered: 1, // For new users, adjust via backend if updating
+      timesEntered: 1,
       token,
       collegeSelect,
       schoolSelect: schoolSelectField,
@@ -583,7 +578,6 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     submitButton.disabled = false;
   }
 });
-
 
 // Generate QR Code and return as Base64 data URL (using QRCode library)
 async function generateQRCodeData(url) {
@@ -711,6 +705,7 @@ async function displayUserData(userData) {
       document.getElementById("specify-school-input").style.display = "none";
     }
   }
+
   userDataDiv.innerHTML = `
     <p>Library ID: ${userData.libraryIdNo}</p>
     <p>Type of Patron: ${userData.patron}</p>
