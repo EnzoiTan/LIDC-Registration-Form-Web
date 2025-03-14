@@ -105,12 +105,6 @@ style.innerHTML = `
   margin-bottom: 5px;
 }
 
-input:disabled, select:disabled {
-    color: black; /* Set text color to black */
-    background-color: #f0f0f0; /* Light grey background to indicate disabled state */
-    opacity: 1; /* Ensure full opacity */
-    cursor: not-allowed; /* Change cursor to indicate disabled state */
-  }
 `;
 
 document.head.appendChild(style);
@@ -424,23 +418,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// Function to hide or disable the submit button
-function hideSubmitButton() {
-  const submitButton = document.querySelector(".submit");
-  if (submitButton) {
-    submitButton.style.display = 'none'; // Hide the submit button
-    // Alternatively, you can disable the button instead of hiding it:
-    // submitButton.disabled = true;
-  }
-}
-
+// Fetch user data if URL parameters exist
 // Fetch user data if URL parameters exist
 document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdInput = document.getElementById("library-id");
   const validUntilInput = document.getElementById("valid-until");
   const patronSelect = document.querySelector('.patron select');
   const schoolSelect = document.querySelector('.school');
-  const schoolSelected = document.querySelector('.school select');
   const specifySchoolInput = document.getElementById("specify-school-input");
 
   if (!libraryIdInput || !validUntilInput || !patronSelect) {
@@ -455,39 +439,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Set the library ID input to the one from the URL initially
   libraryIdInput.value = libraryIdNo || "";
 
-  // Event listener for patron selection
-  patronSelect.addEventListener('change', (event) => {
-    const patronType = event.target.value;
-    console.log("Patron Type Changed:", patronType); // Log the changed patron type
-    toggleFields(patronType);
-  });
-
-  patronSelect.removeEventListener('change', toggleFields); // Remove existing listener if needed
-  patronSelect.addEventListener('change', (event) => {
-    toggleFields(event.target.value);
-  });
-
-  // Initial toggle for patron type
-  const initialPatronType = patronSelect.value;
-  toggleFields(initialPatronType);
-
-  // Initial toggle for patron type
-  toggleFields(patronSelect.value);
-
-  // Function to toggle specify school input
-  const toggleSpecifySchoolInput = () => {
-    if (schoolSelected && schoolSelected.value === 'other') {
-      specifySchoolInput.style.display = 'block';
-    } else {
-      specifySchoolInput.style.display = 'none';
-    }
-  };
-
-  // Event listener for school selection
-  schoolSelect.addEventListener('change', toggleSpecifySchoolInput);
-  toggleSpecifySchoolInput();
-
-  // Fetch user data if libraryIdNo and token are present
+  // Fetch user data first
   if (libraryIdNo && token) {
     toggleLoading(true); // Show loading indicator
     try {
@@ -496,24 +448,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (userData.error) {
         console.error("Error: " + userData.error);
+        // If user not found, set default values
+        validUntilInput.value = "July 2025"; // Set default value
       } else {
-        libraryIdInput.value = userData.libraryIdNo;
+        // User found, populate fields
+        libraryIdInput.value = userData.libraryIdNo || "";
         validUntilInput.value = userData.validUntil || "July 2025";
         displayUserData(userData);
+        toggleFields(userData.patronType);
 
+        // Disable inputs after loading user data
         disableInputs();
-
-        // Check if patron exists
-        if (userData.patron) { // Change this line
-          toggleFields(userData.patron); // Use the patron from userData
-          console.log("Patron Type:", userData.patron); // Log the patron type
-        } else {
-          console.warn("Patron Type is missing in user data. Please check the server response.");
-          toggleFields("defaultPatronType"); // Handle missing patron type
-        }
-
-        // Hide the submit button if user data exists
-        // hideSubmitButton();
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -535,13 +480,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 });
-
-function disableInputs() {
-  const inputs = document.querySelectorAll("input, select");
-  inputs.forEach(input => {
-    input.disabled = true;
-  });
-}
 
 // Auto-capitalize name inputs and restrict middle initial to one letter
 document.addEventListener("DOMContentLoaded", function () {
@@ -720,47 +658,55 @@ async function fetchUserData(libraryId, token) {
 }
 
 function toggleFields(patronType) {
-  const departmentSelect = document.querySelector('.department-select'); // Ensure this exists
-  const selectedDepartment = departmentSelect ? departmentSelect.value : "";
+  const departmentSelect = document.getElementById("department-select");
+  if (!departmentSelect) {
+    console.error("Error: department-select not found.");
+    return;
+  }
 
-  const departmentInput = document.querySelector('.department-input');
-  const courseInput = document.querySelector('.course-input');
-  const majorInput = document.querySelector('.major-input');
-  const strandInput = document.querySelector('.strand-input');
-  const gradeInput = document.querySelector('.grade-input');
-  const schoolSelect = document.querySelector('.school');
-  const campusDeptInput = document.querySelector('.campusdept');
-  const collegeInput = document.querySelector('.college');
+  const departmentInput = document.querySelector(".department-input");
+  const courseInput = document.querySelector(".course-input");
+  const majorInput = document.querySelector(".major-input");
+  const strandInput = document.querySelector(".strand-input");
+  const gradeInput = document.querySelector(".grade-input");
+  const schoolSelectWrapper = document.querySelector(".school");
+  const schoolSelect = document.getElementById("school-select");
+  const campusDeptInput = document.querySelector(".campusdept");
+  const collegeInput = document.querySelector(".college");
 
-  // Hide all inputs initially
-  departmentInput.style.display = 'none';
-  courseInput.style.display = 'none';
-  majorInput.style.display = 'none';
-  strandInput.style.display = 'none';
-  gradeInput.style.display = 'none';
-  schoolSelect.style.display = 'none';
-  campusDeptInput.style.display = 'none';
-  collegeInput.style.display = 'none';
+  // ✅ Check if elements exist before modifying
+  if (departmentInput) departmentInput.style.display = "none";
+  if (courseInput) courseInput.style.display = "none";
+  if (majorInput) majorInput.style.display = "none";
+  if (strandInput) strandInput.style.display = "none";
+  if (gradeInput) gradeInput.style.display = "none";
+  if (schoolSelectWrapper) schoolSelectWrapper.style.display = "none";
+  if (campusDeptInput) campusDeptInput.style.display = "none";
+  if (collegeInput) collegeInput.style.display = "none";
 
-  // Show fields based on patron type
-  if (patronType === "faculty") {
-    collegeInput.style.display = 'block';
-  } else if (patronType === "admin") {
-    campusDeptInput.style.display = 'block';
-  } else if (patronType === "visitor") {
-    schoolSelect.style.display = 'block';
+  // ✅ Prevent errors when accessing undefined elements
+  if (!schoolSelect) {
+    console.error("Error: school-select not found.");
+    return;
+  }
+
+  if (patronType === "faculty" && collegeInput) {
+    collegeInput.style.display = "block";
+  } else if (patronType === "admin" && campusDeptInput) {
+    campusDeptInput.style.display = "block";
+  } else if (patronType === "visitor" && schoolSelectWrapper) {
+    schoolSelectWrapper.style.display = "block";
   } else if (patronType === "student") {
-    departmentInput.style.display = 'block';
+    if (departmentInput) departmentInput.style.display = "block";
 
-    if (selectedDepartment === "shs") {  // If department is SHS, show only strand & grade
-      strandInput.style.display = 'block';
-      gradeInput.style.display = 'block';
-    } else {  // If department is college, show course & major
-      courseInput.style.display = 'block';
-      majorInput.style.display = 'block';
+    if (departmentSelect.value === "shs") {
+      if (strandInput) strandInput.style.display = "block";
+      if (gradeInput) gradeInput.style.display = "block";
+    } else {
+      if (courseInput) courseInput.style.display = "block";
+      if (majorInput) majorInput.style.display = "block";
     }
   } else {
-    // Default case: Show department, course, and major if patronType doesn't match known values
     departmentInput.style.display = 'block';
     courseInput.style.display = 'block';
     majorInput.style.display = 'block';
@@ -857,8 +803,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const response = await fetch(`http://192.168.0.21:8080/fetch_user.php?libraryIdNo=${libraryIdNo}`);
       const userData = await response.json();
       if (userData.error) {
-
-
+        console.error("Error: " + userData.error);
       } else {
         libraryIdInput.value = userData.libraryIdNo;
         validUntilInput.value = userData.validUntil || "July 2025";

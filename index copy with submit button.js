@@ -424,17 +424,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// Function to hide or disable the submit button
-function hideSubmitButton() {
-  const submitButton = document.querySelector(".submit");
-  if (submitButton) {
-    submitButton.style.display = 'none'; // Hide the submit button
-    // Alternatively, you can disable the button instead of hiding it:
-    // submitButton.disabled = true;
-  }
-}
-
-// Fetch user data if URL parameters exist
+/// Fetch user data if URL parameters exist
 document.addEventListener("DOMContentLoaded", async () => {
   const libraryIdInput = document.getElementById("library-id");
   const validUntilInput = document.getElementById("valid-until");
@@ -510,10 +500,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         } else {
           console.warn("Patron Type is missing in user data. Please check the server response.");
           toggleFields("defaultPatronType"); // Handle missing patron type
-        }
 
-        // Hide the submit button if user data exists
-        // hideSubmitButton();
+        }
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
