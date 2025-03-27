@@ -179,7 +179,7 @@
         </div>
       </div>
 
-      <div class="generate-data">
+      <div class="generate-data" style="display: none">
         <div class="data-input">
           <p>ID Number <span class="auto-gen">(Auto-filled by System)</span></p>
           <div class="input-wrapper">
