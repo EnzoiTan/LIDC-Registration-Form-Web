@@ -115,84 +115,76 @@ input:disabled, select:disabled {
 
 document.head.appendChild(style);
 
-function showModal(message, type) {
+function showModal(message, type, userData) {
   const modal = document.createElement("div");
   modal.classList.add("custom-modal");
 
-  // Ensure type is provided; otherwise, use 'info' as default
-  if (!type) {
-    type = 'info';  // Default to 'info' if no type is passed
-  }
-
-  // Determine modal properties based on type
   let iconSrc = '';
   let modalClass = '';
-  let imgSize = '50px';
 
   switch (type) {
     case 'success':
       iconSrc = 'assets/success.png';
       modalClass = 'success';
-      imgSize = '100px';
       break;
     case 'error':
       iconSrc = 'assets/error.png';
       modalClass = 'error';
-      imgSize = '100px';
       break;
     case 'confirmation':
       iconSrc = 'assets/confirmation.jpg';
       modalClass = 'confirmation';
-      imgSize = '100px';
       break;
     case 'warning':
       iconSrc = 'assets/warning.png';
       modalClass = 'warning';
-      imgSize = '70px';
       break;
   }
 
   modal.innerHTML = `
     <div class="modal-content ${modalClass}">
       <div class="modal-icon">
-        <img src="${iconSrc}" alt="${type} icon" style="width: ${imgSize}; max-height: 120px; display: block; margin: 0 auto;" />
+        <img src="${iconSrc}" alt="${type} icon" style="width: 100px; max-height: 120px; display: block; margin: 0 auto;" />
       </div>
       <p class="message">${message.replace(/\n/g, "<br>")}</p>
-      <div class="modal-button-container">
-        <button class="modal-button">Okay</button>
+      <div class="modal-button-container" id="button-container">
+        ${type === 'success' && userData ? '<button class="modal-button" id="download-button">Download ID Card</button>' : ''}
+        <button class="modal-button" id="close-button" style="display: none;">Okay</button>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
 
-  modal.querySelector(".modal-button").addEventListener("click", () => {
-    modal.remove();
+  // Add event listener for the "Download ID Card" button (only for success with userData)
+  if (type === 'success' && userData) {
+    const downloadButton = modal.querySelector("#download-button");
+    downloadButton.addEventListener("click", () => {
+      generateIdCard(userData); // Generate and download the ID card
 
-    if (type === "success") {
-      modal.querySelector(".modal-button").addEventListener("click", () => {
-        modal.remove();
-        location.reload();
-      });
+      // Show the close button after a 3-second delay
+      setTimeout(() => {
+        const closeButton = modal.querySelector("#close-button");
+        closeButton.style.display = "inline-block"; // Show the close button
+      }, 3000); // Simulated 3-second delay before showing Close button
+    });
+  } else {
+    // For error, confirmation, and warning types, show the close button immediately
+    const closeButton = modal.querySelector("#close-button");
+    closeButton.style.display = "inline-block"; // Show the close button immediately
+  }
+
+  // Add event listener for the "Okay" button
+  const closeButton = modal.querySelector("#close-button");
+  closeButton.addEventListener("click", () => {
+    modal.remove(); // Close the modal
+    if (type === 'error' || type === 'success') {
+      location.reload(); // Refresh the page for error or success
     }
-
   });
-
-  if (type === "success") {
-    modal.querySelector(".modal-button").addEventListener("click", () => {
-      modal.remove();
-      location.reload();
-    });
-  }
-
-  if (type === "error") {
-    modal.querySelector(".modal-button").addEventListener("click", () => {
-      modal.remove();
-      window.location.href = "http://192.168.0.21:8080/";
-    });
-  }
-
 }
+
+
 
 // Create the loading overlay
 const loadingOverlay = document.createElement('div');
@@ -667,11 +659,10 @@ document.querySelector(".submit").addEventListener("click", async (event) => {
     } else if (result.alertType === "confirmation") {
       showModal(result.message, "confirmation"); // Explicitly set type to 'confirmation'
     } else if (!result.exists) {
-      // ✅ Download ID Card ONLY when data is successfully saved
-      generateIdCard(userData);
-      showModal(result.success || result.message, "success"); // Explicitly set type to 'success'
+      // Show modal with download button
+      showModal(result.success || result.message, "success", userData); // Pass userData to showModal
     } else {
-      showModal(result.message, result.alertType || "info"); // ✅ Use the correct alertType from the backend
+      showModal(result.message, result.alertType || "info");
     }
   } catch (error) {
     console.error("Error storing data:", error);

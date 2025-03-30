@@ -205,10 +205,9 @@ $stmt->bind_param(
     $name
 );
 
-
 if ($stmt->execute()) {
     echo json_encode([
-        "success" => "Your data has been saved successfully!<br><span class='small-note'><b>Note:</b> Your ID card with QR code has been downloaded. Scan your QR code every time you enter the library to record your attendance.</span>",
+        "success" => "Your data has been saved successfully!<br><span class='small-note'><b>Note:</b> Tap your ID Card with QR code in the QR Scanner every time you enter the library to record your attendance.</span>",
         "exists" => false,
         "timesEntered" => 1,
         "alertType" => "success"
