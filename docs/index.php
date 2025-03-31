@@ -196,6 +196,7 @@
 
       <div id="user-data" style="display: none"></div>
       <button type="submit" class="submit">Submit</button>
+      <input type="text" id="qr-input" placeholder="Scan QR Code" autofocus />
     </form>
 
     <script src="js/qrcode.min.js"></script>
