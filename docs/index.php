@@ -164,9 +164,9 @@
           <select id="year-select" required>
             <option value="" disabled selected class="select-option">Select S.Y.</option>
             <option value="2024-2025">2024 - 2025</option>
-            <option value="2025-2026">2025 - 2026</option>
+            <!-- <option value="2025-2026">2025 - 2026</option>
             <option value="2026-2027">2026 - 2027</option>
-            <option value="2027-2028">2027 - 2028</option>
+            <option value="2027-2028">2027 - 2028</option> -->
           </select>
         </div>
         <div class="data-input">
