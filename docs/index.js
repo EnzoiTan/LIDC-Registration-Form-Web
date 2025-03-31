@@ -694,13 +694,14 @@ async function fetchUserData(libraryId, token) {
     const data = await response.json();
 
     if (data.error) {
-      // Show modal with error message
-      showModal(data.error, data.alertType); // Pass the alertType
+      showModal(data.error, data.alertType);
     } else {
-      // Set the library ID input field only after confirming the user data
       const libraryIdInput = document.getElementById("library-id");
       libraryIdInput.value = data.libraryIdNo || libraryId; // Use fetched ID or fallback to URL ID
       displayUserData(data);
+
+      // Automatically submit the user data after fetching
+      await submitUserData(data); // Call the submission function here
     }
   } catch (error) {
     console.error("Error fetching user data:", error);
@@ -710,45 +711,37 @@ async function fetchUserData(libraryId, token) {
   }
 }
 
-// Listen for QR code scans
-document.addEventListener("DOMContentLoaded", () => {
-  const qrInput = document.getElementById("qr-input"); // Input field for QR code data
+async function submitUserData(userData) {
+  const submitButton = document.querySelector(".submit");
+  submitButton.disabled = true;
+  toggleLoading(true);
 
-  if (qrInput) {
-    qrInput.addEventListener("input", async (event) => {
-      const qrCodeData = event.target.value.trim(); // Get the scanned QR code data
-
-      if (qrCodeData) {
-        toggleLoading(true); // Show loading spinner
-
-        try {
-          // Submit the data to the server
-          const response = await fetch(`http://192.168.0.21:8080/submit_qr.php`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ qrCodeData }),
-          });
-
-          const result = await response.json();
-
-          if (result.success) {
-            // Show success message
-            showModal("Data submitted successfully!", "success");
-          } else {
-            // Show error message
-            showModal(result.error || "An error occurred while submitting the data.", "error");
-          }
-        } catch (error) {
-          console.error("Error submitting QR code data:", error);
-          showModal("An error occurred while submitting the data. Please try again.", "error");
-        } finally {
-          toggleLoading(false); // Hide loading spinner
-          qrInput.value = ""; // Clear the input field
-        }
-      }
+  try {
+    const response = await fetch("http://192.168.0.21:8080/save_user.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userData)
     });
+
+    const result = await response.json();
+
+    if (result.error) {
+      showModal(result.error, "error");
+    } else if (result.alertType === "confirmation") {
+      showModal(result.message, "confirmation");
+    } else if (!result.exists) {
+      showModal(result.success || result.message, "success", userData);
+    } else {
+      showModal(result.message, result.alertType || "info");
+    }
+  } catch (error) {
+    console.error("Error storing data:", error);
+    showModal("An error occurred while storing the data. Please try again.");
+  } finally {
+    toggleLoading(false);
+    submitButton.disabled = false;
   }
-});
+}
 
 function toggleFields(patronType) {
   const departmentSelect = document.querySelector('.department-select'); // Ensure this exists
@@ -861,6 +854,14 @@ async function displayUserData(userData) {
 const urlParams = new URLSearchParams(window.location.search);
 const libraryIdNoParam = urlParams.get('libraryIdNo');
 const tokenParam = urlParams.get('token');
+
+function onQRCodeScanned(libraryId, token) {
+  if (libraryId && token) {
+    fetchUserData(libraryId, token);
+  } else {
+    showModal("Error: Both Library ID and Token are required.", "error");
+  }
+}
 
 if (libraryIdNoParam && tokenParam) {
   fetchUserData(libraryIdNoParam, tokenParam).then(() => {
