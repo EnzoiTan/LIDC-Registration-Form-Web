@@ -710,6 +710,46 @@ async function fetchUserData(libraryId, token) {
   }
 }
 
+// Listen for QR code scans
+document.addEventListener("DOMContentLoaded", () => {
+  const qrInput = document.getElementById("qr-input"); // Input field for QR code data
+
+  if (qrInput) {
+    qrInput.addEventListener("input", async (event) => {
+      const qrCodeData = event.target.value.trim(); // Get the scanned QR code data
+
+      if (qrCodeData) {
+        toggleLoading(true); // Show loading spinner
+
+        try {
+          // Submit the data to the server
+          const response = await fetch(`http://192.168.0.21:8080/submit_qr.php`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ qrCodeData }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            // Show success message
+            showModal("Data submitted successfully!", "success");
+          } else {
+            // Show error message
+            showModal(result.error || "An error occurred while submitting the data.", "error");
+          }
+        } catch (error) {
+          console.error("Error submitting QR code data:", error);
+          showModal("An error occurred while submitting the data. Please try again.", "error");
+        } finally {
+          toggleLoading(false); // Hide loading spinner
+          qrInput.value = ""; // Clear the input field
+        }
+      }
+    });
+  }
+});
+
 function toggleFields(patronType) {
   const departmentSelect = document.querySelector('.department-select'); // Ensure this exists
   const selectedDepartment = departmentSelect ? departmentSelect.value : "";
