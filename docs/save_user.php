@@ -26,11 +26,10 @@ if (!$data) {
 $requiredFields = [
     'student' => ['libraryIdNo', 'firstName', 'lastName', 'gender', 'department', 'schoolYear', 'semester'],
     'faculty' => ['libraryIdNo', 'firstName', 'lastName', 'gender', 'collegeSelect', 'schoolYear', 'semester'],
-    'admin' => ['libraryIdNo', 'firstName', 'lastName', 'gender', 'campusDept', 'schoolYear', 'semester'],
+    'admin'   => ['libraryIdNo', 'firstName', 'lastName', 'gender', 'campusDept', 'schoolYear', 'semester'],
     'visitor' => ['libraryIdNo', 'firstName', 'lastName', 'gender', 'schoolYear', 'semester'],
 ];
 
-// Ensure SHS students require 'grade' and 'strand', while college students require 'course' and 'major'
 $department = strtolower($data['department'] ?? '');
 if ($department === "shs") {
     $requiredFields['student'][] = 'grade';
@@ -132,7 +131,7 @@ if ($checkStmt->num_rows > 0) {
         echo json_encode([
             "exists" => true,
             "timesEntered" => $newTimesEntered,
-            "message" => "Good day, $firstName $lastName! Your entry has been recorded.",
+            "message" => "Your entry has been recorded.", // ✅ Fix: No name for first-time users
             "alertType" => 'success'
         ]);
     } else {
@@ -148,24 +147,6 @@ if ($checkStmt->num_rows > 0) {
 }
 $checkStmt->close();
 
-// Check for duplicate entries based on relevant fields
-$duplicateCheckSql = "SELECT libraryIdNo FROM std_details WHERE firstName = ? AND lastName = ? AND gender = ? AND department = ? AND course = ? AND major = ? AND grade = ? AND strand = ? AND schoolYear = ? AND semester = ?";
-$duplicateCheckStmt = $conn->prepare($duplicateCheckSql);
-$duplicateCheckStmt->bind_param("ssssssssss", $firstName, $lastName, $gender, $department, $course, $major, $grade, $strand, $schoolYear, $semester);
-$duplicateCheckStmt->execute();
-$duplicateCheckStmt->store_result();
-
-if ($duplicateCheckStmt->num_rows > 0) {
-    echo json_encode([
-        "error" => "Duplicate entry detected. A user with the same details already exists.",
-        "alertType" => "error"
-    ]);
-    $duplicateCheckStmt->close();
-    $conn->close();
-    exit();
-}
-$duplicateCheckStmt->close();
-
 // ✅ Insert new user (first-time entry)
 $timesEntered = 1;
 $timestamps = json_encode([$newTimestamp]);
@@ -178,7 +159,7 @@ $insertSql = "INSERT INTO std_details (
 
 $stmt = $conn->prepare($insertSql);
 $stmt->bind_param(
-    "ssssssssssssssssssssssis",  // Correct order and types
+    "ssssssssssssssssssssssis",
     $libraryIdNo,
     $validUntil,
     $patron,
@@ -193,21 +174,23 @@ $stmt->bind_param(
     $strand,
     $schoolYear,
     $semester,
-    $token,            // Token should be "s" for string
+    $token,
     $collegeSelect,
     $schoolSelect,
     $specifySchool,
     $campusDept,
     $qrCodeURL,
     $qrCodeImage,
-    $timestamps,       // Timestamps should be "s"
-    $timesEntered,     // TimesEntered should be "i"
+    $timestamps,
+    $timesEntered,
     $name
 );
 
 if ($stmt->execute()) {
     echo json_encode([
-        "success" => "Your data has been saved successfully!<br><span class='small-note'><b>Note:</b> Tap your ID Card with QR code in the QR Scanner every time you enter the library to record your attendance.</span>",
+        "success" => "Your data has been saved successfully!<br>
+                      <span class='small-note'><b>Note:</b> Tap your ID Card with QR code in the QR Scanner 
+                      every time you enter the library to record your attendance.</span>",
         "exists" => false,
         "timesEntered" => 1,
         "alertType" => "success"

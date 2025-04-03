@@ -149,7 +149,7 @@ function showModal(message, type, userData) {
       <p class="message">${message.replace(/\n/g, "<br>")}</p>
       <div class="modal-button-container" id="button-container">
         ${type === 'success' && userData ? '<button class="modal-button" id="download-button">Download ID Card</button>' : ''}
-        <button class="modal-button" id="close-button" style="display: none;">Okay</button>
+        <button class="modal-button" id="close-button">Okay</button>
       </div>
     </div>
   `;
@@ -162,16 +162,12 @@ function showModal(message, type, userData) {
     downloadButton.addEventListener("click", () => {
       generateIdCard(userData); // Generate and download the ID card
 
-      // Show the close button after a 3-second delay
-      setTimeout(() => {
-        const closeButton = modal.querySelector("#close-button");
-        closeButton.style.display = "inline-block"; // Show the close button
-      }, 3000); // Simulated 3-second delay before showing Close button
+      // Ensure the close button remains visible after clicking "Download ID Card"
+      const closeButton = modal.querySelector("#close-button");
+      if (closeButton.style.display === "none") {
+        closeButton.style.display = "inline-block";
+      }
     });
-  } else {
-    // For error, confirmation, and warning types, show the close button immediately
-    const closeButton = modal.querySelector("#close-button");
-    closeButton.style.display = "inline-block"; // Show the close button immediately
   }
 
   // Add event listener for the "Okay" button
@@ -183,6 +179,7 @@ function showModal(message, type, userData) {
     }
   });
 }
+
 
 
 
@@ -233,8 +230,13 @@ const departmentCourses = {
       "BS Electrical Technology": ["None"],
       "BS Electronics Technology": ["None"],
       "BS Mechanical Technology": ["None"],
+
       "BS Refrigeration and Air Conditioning Technology": ["None"],
-      "BS Computer Technology": ["None"],
+      "BS Computer Technology": [
+        "Programming 1",
+        "Programming 2",
+        "Computer Hardware Servicing",
+      ],
       "BS Civil Engineering": ["None"],
       "Bachelor of Industrial Technology": [
         "Automotive Technology",
@@ -855,13 +857,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const libraryIdNoParam = urlParams.get('libraryIdNo');
 const tokenParam = urlParams.get('token');
 
-function onQRCodeScanned(libraryId, token) {
-  if (libraryId && token) {
-    fetchUserData(libraryId, token);
-  } else {
-    showModal("Error: Both Library ID and Token are required.", "error");
-  }
-}
 
 if (libraryIdNoParam && tokenParam) {
   fetchUserData(libraryIdNoParam, tokenParam).then(() => {

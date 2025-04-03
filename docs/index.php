@@ -196,6 +196,12 @@
 
       <div id="user-data" style="display: none"></div>
       <button type="submit" class="submit">Submit</button>
+
+      <div id="successModal" style="display: none;">
+        <p id="modalMessage"></p>
+        <button onclick="closeModal()">Close</button>
+      </div>
+
     </form>
 
     <script src="js/qrcode.min.js"></script>
