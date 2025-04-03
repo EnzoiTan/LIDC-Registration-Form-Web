@@ -131,7 +131,7 @@ if ($checkStmt->num_rows > 0) {
         echo json_encode([
             "exists" => true,
             "timesEntered" => $newTimesEntered,
-            "message" => "Your entry has been recorded.", // ✅ Fix: No name for first-time users
+            "message" => "Your entry has been recorded.",
             "alertType" => 'success'
         ]);
     } else {
@@ -144,63 +144,64 @@ if ($checkStmt->num_rows > 0) {
     $updateStmt->close();
     $conn->close();
     exit();
-}
-$checkStmt->close();
-
-// ✅ Insert new user (first-time entry)
-$timesEntered = 1;
-$timestamps = json_encode([$newTimestamp]);
-
-$insertSql = "INSERT INTO std_details (
-    libraryIdNo, validUntil, patron, lastName, firstName, middleInitial, gender, department, course, major, 
-    grade, strand, schoolYear, semester, token, collegeSelect, schoolSelect, specifySchool, campusDept, 
-    qrCodeURL, qrCodeImage, $timestampsColumn, $timesEnteredColumn, name
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-$stmt = $conn->prepare($insertSql);
-$stmt->bind_param(
-    "ssssssssssssssssssssssis",
-    $libraryIdNo,
-    $validUntil,
-    $patron,
-    $lastName,
-    $firstName,
-    $middleInitial,
-    $gender,
-    $department,
-    $course,
-    $major,
-    $grade,
-    $strand,
-    $schoolYear,
-    $semester,
-    $token,
-    $collegeSelect,
-    $schoolSelect,
-    $specifySchool,
-    $campusDept,
-    $qrCodeURL,
-    $qrCodeImage,
-    $timestamps,
-    $timesEntered,
-    $name
-);
-
-if ($stmt->execute()) {
-    echo json_encode([
-        "success" => "Your data has been saved successfully!<br>
-                      <span class='small-note'><b>Note:</b> Tap your ID Card with QR code in the QR Scanner 
-                      every time you enter the library to record your attendance.</span>",
-        "exists" => false,
-        "timesEntered" => 1,
-        "alertType" => "success"
-    ]);
 } else {
-    echo json_encode([
-        "error" => "Failed to save user",
-        "alertType" => "error"
-    ]);
-}
+    $checkStmt->close();
 
-$stmt->close();
-$conn->close();
+    // ✅ Insert new user (first-time entry)
+    $timesEntered = 1;
+    $timestamps = json_encode([$newTimestamp]);
+
+    $insertSql = "INSERT INTO std_details (
+        libraryIdNo, validUntil, patron, lastName, firstName, middleInitial, gender, department, course, major, 
+        grade, strand, schoolYear, semester, token, collegeSelect, schoolSelect, specifySchool, campusDept, 
+        qrCodeURL, qrCodeImage, $timestampsColumn, $timesEnteredColumn, name
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    $stmt = $conn->prepare($insertSql);
+    $stmt->bind_param(
+        "ssssssssssssssssssssssis",
+        $libraryIdNo,
+        $validUntil,
+        $patron,
+        $lastName,
+        $firstName,
+        $middleInitial,
+        $gender,
+        $department,
+        $course,
+        $major,
+        $grade,
+        $strand,
+        $schoolYear,
+        $semester,
+        $token,
+        $collegeSelect,
+        $schoolSelect,
+        $specifySchool,
+        $campusDept,
+        $qrCodeURL,
+        $qrCodeImage,
+        $timestamps,
+        $timesEntered,
+        $name
+    );
+
+    if ($stmt->execute()) {
+        echo json_encode([
+            "success" => "Your data has been saved successfully!<br>
+                          <span class='small-note'><b>Note:</b> Tap your ID Card with QR code in the QR Scanner 
+                          every time you enter the library to record your attendance.</span>",
+            "exists" => false,
+            "timesEntered" => 1,
+            "alertType" => "success"
+        ]);
+    } else {
+        echo json_encode([
+            "error" => "Failed to save user",
+            "alertType" => "error"
+        ]);
+    }
+
+    $stmt->close();
+    $conn->close();
+}

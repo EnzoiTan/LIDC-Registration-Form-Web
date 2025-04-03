@@ -180,9 +180,6 @@ function showModal(message, type, userData) {
   });
 }
 
-
-
-
 // Create the loading overlay
 const loadingOverlay = document.createElement('div');
 loadingOverlay.className = 'loading-overlay';
