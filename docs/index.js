@@ -2,7 +2,8 @@ const ALERT_TYPES = {
   SUCCESS: 'success',
   ERROR: 'error',
   CONFIRMATION: 'confirmation',
-  WARNING: 'warning'
+  WARNING: 'warning',
+  TIMESUSED: 'times_used'
 };
 
 const style = document.createElement('style');
@@ -95,17 +96,30 @@ style.innerHTML = `
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+    
+  #download-button {
+    background-color: rgb(40, 107, 33);
+    color: white;
+    border: none;
+    padding: 8px 30px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
 
-  .small-note {
-  font-size: 12px; /* Make text smaller */
-  font-family: ariel, sans-serif;
-  color: #666; /* Use a slightly faded color */
-  display: block;
-  margin-top: 10px;
-  margin-bottom: 5px;
-}
+  #download-button svg {
+    width: 16px;
+    height: 16px;
+    fill: white;
+  }
 
-input:disabled, select:disabled {
+  input:disabled, select:disabled {
     color: black; /* Set text color to black */
     background-color: #f0f0f0; /* Light grey background to indicate disabled state */
     opacity: 1; /* Ensure full opacity */
@@ -139,45 +153,99 @@ function showModal(message, type, userData) {
       iconSrc = 'assets/warning.png';
       modalClass = 'warning';
       break;
+    case 'times_used':
+      iconSrc = 'assets/success.png';
+      modalClass = 'times_used';
+      break;
   }
 
-  modal.innerHTML = `
+  // Check if times_used type (no buttons, just message and auto-close)
+  if (type === 'times_used') {
+    modal.innerHTML = `
+    <div class="modal-content ${modalClass}">
+      <div class="modal-icon">
+        <img src="${iconSrc}" alt="${type} icon" style="width: 100px; max-height: 120px; display: block; margin: 0 auto;" />
+      </div>
+      <p class="message">${message.replace(/\n/g)}</p>
+    </div>
+  `;
+  } else if (type === 'success') {
+    modal.innerHTML = `
+      <div class="modal-content ${modalClass}">
+        <div class="modal-icon">
+          <img src="${iconSrc}" alt="${type} icon" style="width: 100px; max-height: 120px; display: block; margin: 0 auto;" />
+        </div>
+        <p class="message">${message.replace(/\n/g, "<br>")}</p>
+        <div class="modal-button-container" id="button-container">
+          ${type === 'success' && userData
+        ? `<button class="modal-button" id="download-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 35px; height: 35px; fill: white;">
+              <path d="M5 20h14v-2H5v2zm7-18v12l5-5h-3V4h-4v5H7l5 5z"/>
+            </svg>
+            Tap to Download ID Card (Required)
+          </button>`
+        : ''
+      }
+        </div>
+      </div>
+    `;
+  } else if (type === 'confirmation') {
+    modal.innerHTML = `
     <div class="modal-content ${modalClass}">
       <div class="modal-icon">
         <img src="${iconSrc}" alt="${type} icon" style="width: 100px; max-height: 120px; display: block; margin: 0 auto;" />
       </div>
       <p class="message">${message.replace(/\n/g, "<br>")}</p>
       <div class="modal-button-container" id="button-container">
-        ${type === 'success' && userData ? '<button class="modal-button" id="download-button">Download ID Card</button>' : ''}
-        <button class="modal-button" id="close-button">Okay</button>
+        <button class="modal-button" id="close-button">OK</button>
       </div>
     </div>
   `;
+  } else {
+    modal.innerHTML = `
+    <div class="modal-content ${modalClass}">
+      <div class="modal-icon">
+        <img src="${iconSrc}" alt="${type} icon" style="width: 100px; max-height: 120px; display: block; margin: 0 auto;" />
+      </div>
+      <p class="message">${message.replace(/\n/g, "<br>")}</p>
+      <div class="modal-button-container" id="button-container">
+      </div>
+    </div>
+  `;
+  }
+
+
 
   document.body.appendChild(modal);
 
-  // Add event listener for the "Download ID Card" button (only for success with userData)
+  // Handle auto-close if type is times_used
+  if (type === 'times_used') {
+    setTimeout(() => {
+      window.close();
+    }, 1000);
+    return; // Stop further execution
+  }
+
+  // Download button action for success with userData
   if (type === 'success' && userData) {
     const downloadButton = modal.querySelector("#download-button");
-    downloadButton.addEventListener("click", () => {
-      generateIdCard(userData); // Generate and download the ID card
+    if (downloadButton) {
+      downloadButton.addEventListener("click", () => {
+        generateIdCard(userData);
+      });
+    }
+  }
 
-      // Ensure the close button remains visible after clicking "Download ID Card"
-      const closeButton = modal.querySelector("#close-button");
-      if (closeButton.style.display === "none") {
-        closeButton.style.display = "inline-block";
+  // Close button action
+  const closeButton = modal.querySelector("#close-button");
+  if (closeButton) {
+    closeButton.addEventListener("click", () => {
+      modal.remove();
+      if (type === 'error' || type === 'success') {
+        location.reload();
       }
     });
   }
-
-  // Add event listener for the "Okay" button
-  const closeButton = modal.querySelector("#close-button");
-  closeButton.addEventListener("click", () => {
-    modal.remove(); // Close the modal
-    if (type === 'error' || type === 'success') {
-      location.reload(); // Refresh the page for error or success
-    }
-  });
 }
 
 // Create the loading overlay
@@ -215,7 +283,7 @@ const departmentCourses = {
   },
   cet: {
     courses: {
-      "BS Industrial Technology": [
+      "BS Industrial Technology (BSIT)": [
         "Architectural Drafting Technology",
         "Civil Technology",
         "Food Technology",
@@ -235,7 +303,7 @@ const departmentCourses = {
         "Computer Hardware Servicing",
       ],
       "BS Civil Engineering": ["None"],
-      "Bachelor of Industrial Technology": [
+      "BIndTech": [
         "Automotive Technology",
         "Apparel and Fashion Technology",
         "Architectural Drafting Technology",

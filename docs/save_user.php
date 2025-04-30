@@ -131,8 +131,8 @@ if ($checkStmt->num_rows > 0) {
         echo json_encode([
             "exists" => true,
             "timesEntered" => $newTimesEntered,
-            "message" => "Your entry has been recorded.",
-            "alertType" => 'success'
+            "message" => "Entry has been recorded.",
+            "alertType" => 'times_used'
         ]);
     } else {
         echo json_encode([
@@ -146,6 +146,24 @@ if ($checkStmt->num_rows > 0) {
     exit();
 } else {
     $checkStmt->close();
+
+    // Check for duplicate entries based on relevant fields
+    $duplicateCheckSql = "SELECT libraryIdNo FROM std_details WHERE firstName = ? AND lastName = ? AND gender = ? AND department = ? AND course = ? AND major = ? AND grade = ? AND strand = ?";
+    $duplicateCheckStmt = $conn->prepare($duplicateCheckSql);
+    $duplicateCheckStmt->bind_param("ssssssss", $firstName, $lastName, $gender, $department, $course, $major, $grade, $strand);
+    $duplicateCheckStmt->execute();
+    $duplicateCheckStmt->store_result();
+
+    if ($duplicateCheckStmt->num_rows > 0) {
+        echo json_encode([
+            "error" => "Duplicate entry detected. A user with the same details already exists.",
+            "alertType" => "error"
+        ]);
+        $duplicateCheckStmt->close();
+        $conn->close();
+        exit();
+    }
+    $duplicateCheckStmt->close();
 
     // ✅ Insert new user (first-time entry)
     $timesEntered = 1;
@@ -189,8 +207,7 @@ if ($checkStmt->num_rows > 0) {
     if ($stmt->execute()) {
         echo json_encode([
             "success" => "Your data has been saved successfully!<br>
-                          <span class='small-note'><b>Note:</b> Tap your ID Card with QR code in the QR Scanner 
-                          every time you enter the library to record your attendance.</span>",
+                          <span class='small-note'><b>Note:</b> Tap your ID Card with QR code in the QR Scanner every time you enter the library to record your attendance.</span>",
             "exists" => false,
             "timesEntered" => 1,
             "alertType" => "success"

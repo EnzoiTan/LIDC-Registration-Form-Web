@@ -444,4 +444,137 @@ select {
   flex-shrink: 0;
 }
 
+.custom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.auto-gen {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+/* Modal Content */
+.modal-content {
+  background: white;
+  padding: 20px;
+  margin: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  width: 320px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Checkmark / Error Icon */
+.modal-icon {
+  padding: 0;
+  margin-bottom: 15px;
+}
+
+p {
+  padding: 0;
+}
+
+/* Message Text */
+.modal-content p {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+/* OK Button */
+.modal-button {
+  background: rgb(33, 33, 33);
+  color: white;
+  border: none;
+  padding: 8px 30px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.modal-button:hover {
+  background: rgb(48, 48, 48);
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Loading Spinner Styles */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.8);
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+}
+
+.loading-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #8b2c2c;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.small-note {
+  font-size: 12px;
+  /* Make text smaller */
+  font-family: ariel, sans-serif;
+  color: #666;
+  /* Use a slightly faded color */
+  display: block;
+  margin-bottom: 5px;
+}
+
+input:disabled,
+select:disabled {
+  color: black;
+  /* Set text color to black */
+  background-color: #f0f0f0;
+  /* Light grey background to indicate disabled state */
+  opacity: 1;
+  /* Ensure full opacity */
+  cursor: not-allowed;
+  /* Change cursor to indicate disabled state */
+}
+
 /*# sourceMappingURL=index.css.map */

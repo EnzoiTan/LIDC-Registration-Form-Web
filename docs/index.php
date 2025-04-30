@@ -137,6 +137,7 @@
             <option value="Cashier">Cashier</option>
             <option value="Office and the Vice President for Student Affairs">Office and the Vice President for Student Affairs</option>
             <option value="Human Resources">Human Resources</option>
+            <option value="Learning Commons Center">Learning Commons Center</option>
           </select>
         </div>
 
